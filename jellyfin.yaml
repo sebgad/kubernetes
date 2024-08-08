@@ -27,11 +27,11 @@ spec:
       name: opt-pods-jellyfin-cache-host-1
     - mountPath: /media
       name: mnt-clouddrive-jellyfin-host-2
-  - name: backup_config
+  - name: backup-config
     image: localhost/restic:latest
     env:
       - name: RESTIC_TAG
-        value: jellyfin
+        value: jellyfin-config
       - name: RESTIC_FORGET_ARGS
         value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
       - name: RESTIC_PASSWORD
@@ -58,11 +58,11 @@ spec:
         name: etc-timezone-host-1
       - mountPath: /etc/localtime
         name: etc-localtime-host-2
-  - name: backup_media
+  - name: backup-media
     image: localhost/restic:latest
     env:
       - name: RESTIC_TAG
-        value: jellyfin
+        value: jellyfin-media
       - name: RESTIC_FORGET_ARGS
         value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
       - name: RESTIC_PASSWORD
@@ -90,6 +90,14 @@ spec:
       - mountPath: /etc/localtime
         name: etc-localtime-host-2
   volumes:
+  - hostPath:
+      path: /etc/timezone
+      type: Directory
+    name: etc-timezone-host-1
+  - hostPath:
+      path: /etc/localtime
+      type: Directory
+    name: etc-localtime-host-2
   - hostPath:
       path: /opt/pods/jellyfin/config
       type: Directory
