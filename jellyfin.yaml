@@ -7,8 +7,8 @@ kind: Pod
 metadata:
   annotations:
     io.containers.autoupdate/backend: registry
-    io.containers.autoupdate/backup_config: registry
-    io.containers.autoupdate/backup_media: registry
+    io.containers.autoupdate/backup-config: registry
+    io.containers.autoupdate/backup-media: registry
   creationTimestamp: "2024-07-21T10:23:33Z"
   labels:
     app: jellyfin
