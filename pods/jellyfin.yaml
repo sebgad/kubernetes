@@ -1,0 +1,117 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.3
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.containers.autoupdate/backend: registry
+    io.containers.autoupdate/backup_config: registry
+    io.containers.autoupdate/backup_media: registry
+  creationTimestamp: "2024-07-21T10:23:33Z"
+  labels:
+    app: jellyfin
+  name: jellyfin
+spec:
+  containers:
+  - name: backend
+    image: docker.io/jellyfin/jellyfin:latest
+    ports:
+    - containerPort: 8096
+      hostPort: 8096
+    volumeMounts:
+    - mountPath: /config
+      name: opt-pods-jellyfin-config-host-0
+    - mountPath: /cache
+      name: opt-pods-jellyfin-cache-host-1
+    - mountPath: /media
+      name: mnt-clouddrive-jellyfin-host-2
+  - name: backup_config
+    image: localhost/restic:latest
+    env:
+      - name: RESTIC_TAG
+        value: jellyfin
+      - name: RESTIC_FORGET_ARGS
+        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+      - name: RESTIC_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: jellyfin
+            key: restic_pw
+      - name: TERM
+        value: xterm
+      - name: BACKUP_CRON
+        value: "0 5 * * *"
+      - name: CHECK_CRON
+        value: "0 22 * * *"
+    args:
+      - tail
+      - -fn0
+      - /var/log/cron.log
+    volumeMounts:
+      - mountPath: /mnt/repo
+        name: mnt-clouddrive-backup-jellyfin-opt
+      - mountPath: /data
+        name: opt-pods-jellyfin
+      - mountPath: /etc/timezone
+        name: etc-timezone-host-1
+      - mountPath: /etc/localtime
+        name: etc-localtime-host-2
+  - name: backup_media
+    image: localhost/restic:latest
+    env:
+      - name: RESTIC_TAG
+        value: jellyfin
+      - name: RESTIC_FORGET_ARGS
+        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+      - name: RESTIC_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: jellyfin
+            key: restic_pw
+      - name: TERM
+        value: xterm
+      - name: BACKUP_CRON
+        value: "0 5 * * *"
+      - name: CHECK_CRON
+        value: "0 22 * * *"
+    args:
+      - tail
+      - -fn0
+      - /var/log/cron.log
+    volumeMounts:
+      - mountPath: /mnt/repo
+        name: mnt-clouddrive-backup-jellyfin-media
+      - mountPath: /data
+        name: mnt-clouddrive-jellyfin-host-2
+      - mountPath: /etc/timezone
+        name: etc-timezone-host-1
+      - mountPath: /etc/localtime
+        name: etc-localtime-host-2
+  volumes:
+  - hostPath:
+      path: /opt/pods/jellyfin/config
+      type: Directory
+    name: opt-pods-jellyfin-config-host-0
+  - hostPath:
+      path: /opt/pods/jellyfin/cache
+      type: Directory
+    name: opt-pods-jellyfin-cache-host-1
+  - hostPath:
+      path: /mnt/clouddrive/jellyfin
+      type: Directory
+    name: mnt-clouddrive-jellyfin-host-2
+  - hostPath:
+      path: /opt/pods/jellyfin
+      type: Directory
+    name: opt-pods-jellyfin
+  - hostPath:
+      path: /mnt/clouddrive_backup/backup/jellyfin/opt
+      type: Directory
+    name: mnt-clouddrive-backup-jellyfin-opt
+  - hostPath:
+      path: /mnt/clouddrive_backup/backup/jellyfin/media
+      type: Directory
+    name: mnt-clouddrive-backup-jellyfin-media
+

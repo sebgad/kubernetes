@@ -1,0 +1,158 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.3
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    bind-mount-options: /opt/pods/vaultwarden/database/data:Z
+    io.containers.autoupdate/backend: registry
+    io.containers.autoupdate/database: registry
+    io.containers.autoupdate/backup: registry
+  creationTimestamp: "2024-07-22T17:16:20Z"
+  labels:
+    app: vaultwarden
+  name: vaultwarden
+spec:
+  containers:
+    - name: backend
+      image: docker.io/vaultwarden/server:latest
+      env:
+        - name: INVITATIONS_ALLOWED
+          value: "false"
+        - name: ADMIN_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: admin_token
+        - name: LOG_FILE
+          value: /data/vaultwarden.log
+        - name: YUBICO_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: yubico_client_id
+        - name: ENABLE_DB_WAL
+          value: "false"
+        - name: YUBICO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: yubico_secret
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: database_url
+        - name: WEBSOCKET_ENABLED
+          value: "true"
+        - name: TIME_ZONE
+          value: Europe/Berlin
+        - name: SIGNUPS_ALLOWED
+          value: "false"
+      ports:
+        - containerPort: 80
+          hostPort: 8082
+      volumeMounts:
+        - mountPath: /data/
+          name: opt-pods-vaultwarden-vaultwarden-host-0
+        - mountPath: /etc/timezone
+          name: etc-timezone-host-1
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: etc-localtime-host-2
+          readOnly: true
+    - name: database
+      image: docker.io/library/mariadb:latest
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: database_root_pw
+        - name: MARIADB_USER
+          value: vaultwarden
+        - name: MARIADB_DATABASE
+          value: vaultwarden
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: database_user_pw
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: opt-pods-vaultwarden-database-data-host-0
+        - mountPath: /docker-entrypoint-initdb.d
+          name: opt-pods-vaultwarden-database-entrypoint-host-1
+      args:
+        - mariadbd
+    - name: backup
+      image: localhost/restic:latest
+      env:
+        - name: MARIADB_BACKUP_USER
+          value: vaultwarden
+        - name: MARIADB_BACKUP_PW
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: database_user_pw
+        - name: RESTIC_TAG
+          value: vaultwarden
+        - name: RESTIC_FORGET_ARGS
+          value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+        - name: RESTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: restic_pw
+        - name: MARIADB_DATABASE
+          value: vaultwarden
+        - name: TERM
+          value: xterm
+        - name: BACKUP_CRON
+          value: "0 5 * * *"
+        - name: CHECK_CRON
+          value: "0 22 * * *"
+      args:
+        - tail
+        - -fn0
+        - /var/log/cron.log
+      volumeMounts:
+        - mountPath: /mnt/repo
+          name: mnt-clouddrive_backup-backup-vaultwarden-host-0
+        - mountPath: /data
+          name: opt-pods-vaultwarden-host-1
+        - mountPath: /etc/timezone
+          name: etc-timezone-host-1
+        - mountPath: /etc/localtime
+          name: etc-localtime-host-2
+  volumes:
+    - hostPath:
+        path: /etc/timezone
+        type: File
+      name: etc-timezone-host-1
+    - hostPath:
+        path: /etc/localtime
+        type: File
+      name: etc-localtime-host-2
+    - hostPath:
+        path: /opt/pods/vaultwarden/database/data
+        type: Directory
+      name: opt-pods-vaultwarden-database-data-host-0
+    - hostPath:
+        path: /opt/pods/vaultwarden/database/entrypoint
+        type: Directory
+      name: opt-pods-vaultwarden-database-entrypoint-host-1
+    - hostPath:
+        path: /opt/pods/vaultwarden/vaultwarden
+        type: Directory
+      name: opt-pods-vaultwarden-vaultwarden-host-0
+    - hostPath:
+        path: /mnt/clouddrive_backup/backup/vaultwarden
+        type: Directory
+      name: mnt-clouddrive_backup-backup-vaultwarden-host-0
+    - hostPath:
+        path: /opt/pods/vaultwarden
+        type: Directory
+      name: opt-pods-vaultwarden-host-1
