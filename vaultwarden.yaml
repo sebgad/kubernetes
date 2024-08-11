@@ -10,7 +10,7 @@ metadata:
     io.containers.autoupdate/backend: registry
     io.containers.autoupdate/database: registry
     io.containers.autoupdate/backup: registry
-  creationTimestamp: "2024-07-22T17:16:20Z"
+    io.containers.autoupdate/backup-redundant: registry
   labels:
     app: vaultwarden
   name: vaultwarden
@@ -88,7 +88,7 @@ spec:
       args:
         - mariadbd
     - name: backup
-      image: localhost/restic:latest
+      image: localhost/restainer:latest
       env:
         - name: MARIADB_BACKUP_USER
           value: vaultwarden
@@ -127,6 +127,46 @@ spec:
           name: etc-timezone-host-1
         - mountPath: /etc/localtime
           name: etc-localtime-host-2
+    - name: backup-redundand
+      image: localhost/restainer:latest
+      env:
+        - name: MARIADB_BACKUP_USER
+          value: vaultwarden
+        - name: MARIADB_BACKUP_PW
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: database_user_pw
+        - name: RESTIC_TAG
+          value: vaultwarden
+        - name: RESTIC_FORGET_ARGS
+          value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+        - name: RESTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden
+              key: restic_pw
+        - name: MARIADB_DATABASE
+          value: vaultwarden
+        - name: TERM
+          value: xterm
+        - name: BACKUP_CRON
+          value: "0 5 * * *"
+        - name: CHECK_CRON
+          value: "0 22 * * *"
+      args:
+        - tail
+        - -fn0
+        - /var/log/cron.log
+      volumeMounts:
+        - mountPath: /mnt/repo
+          name: mnt-clouddrive_backup-backup-redundand-vaultwarden-host-0
+        - mountPath: /data
+          name: opt-pods-vaultwarden-host-1
+        - mountPath: /etc/timezone
+          name: etc-timezone-host-1
+        - mountPath: /etc/localtime
+          name: etc-localtime-host-2
   volumes:
     - hostPath:
         path: /etc/timezone
@@ -152,6 +192,10 @@ spec:
         path: /mnt/clouddrive_backup/backup/vaultwarden
         type: Directory
       name: mnt-clouddrive_backup-backup-vaultwarden-host-0
+    - hostPath:
+        path: /mnt/clouddrive_backup/backup_redundant/vaultwarden
+        type: Directory
+      name: mnt-clouddrive_backup-backup-redundand-vaultwarden-host-0
     - hostPath:
         path: /opt/pods/vaultwarden
         type: Directory
