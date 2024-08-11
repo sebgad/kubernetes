@@ -127,7 +127,7 @@ spec:
           name: etc-timezone-host-1
         - mountPath: /etc/localtime
           name: etc-localtime-host-2
-    - name: backup-redundand
+    - name: backup-redundant
       image: localhost/restainer:latest
       env:
         - name: MARIADB_BACKUP_USER
@@ -160,7 +160,7 @@ spec:
         - /var/log/cron.log
       volumeMounts:
         - mountPath: /mnt/repo
-          name: mnt-clouddrive_backup-backup-redundand-vaultwarden-host-0
+          name: mnt-clouddrive_backup-backup-redundant-vaultwarden-host-0
         - mountPath: /data
           name: opt-pods-vaultwarden-host-1
         - mountPath: /etc/timezone
@@ -195,7 +195,7 @@ spec:
     - hostPath:
         path: /mnt/clouddrive_backup/backup_redundant/vaultwarden
         type: Directory
-      name: mnt-clouddrive_backup-backup-redundand-vaultwarden-host-0
+      name: mnt-clouddrive_backup-backup-redundant-vaultwarden-host-0
     - hostPath:
         path: /opt/pods/vaultwarden
         type: Directory

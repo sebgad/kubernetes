@@ -9,8 +9,8 @@ metadata:
     io.containers.autoupdate/backend: registry
     io.containers.autoupdate/backup-config: registry
     io.containers.autoupdate/backup-media: registry
-    io.containers.autoupdate/backup-redundand-config: registry
-    io.containers.autoupdate/backup-redundand-media: registry
+    io.containers.autoupdate/backup-redundant-config: registry
+    io.containers.autoupdate/backup-redundant-media: registry
   labels:
     app: jellyfin
   name: jellyfin
@@ -90,7 +90,7 @@ spec:
         name: etc-timezone-host-1
       - mountPath: /etc/localtime
         name: etc-localtime-host-2
-  - name: backup-redundand-config
+  - name: backup-redundant-config
     image: localhost/restainer:latest
     env:
       - name: RESTIC_TAG
@@ -114,14 +114,14 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-redundand-jellyfin-opt
+        name: mnt-clouddrive-backup-redundant-jellyfin-opt
       - mountPath: /data
         name: opt-pods-jellyfin
       - mountPath: /etc/timezone
         name: etc-timezone-host-1
       - mountPath: /etc/localtime
         name: etc-localtime-host-2
-  - name: backup-redundand-media
+  - name: backup-redundant-media
     image: localhost/restainer:latest
     env:
       - name: RESTIC_TAG
@@ -145,7 +145,7 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-redundand-jellyfin-media
+        name: mnt-clouddrive-backup-redundant-jellyfin-media
       - mountPath: /data
         name: mnt-clouddrive-jellyfin-host-2
       - mountPath: /etc/timezone
@@ -188,9 +188,9 @@ spec:
   - hostPath:
       path: /mnt/clouddrive_backup/backup_redundant/jellyfin/opt
       type: Directory
-    name: mnt-clouddrive-backup-redundand-jellyfin-opt
+    name: mnt-clouddrive-backup-redundant-jellyfin-opt
   - hostPath:
       path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
       type: Directory
-    name: mnt-clouddrive-backup-redundand-jellyfin-media
+    name: mnt-clouddrive-backup-redundant-jellyfin-media
 
