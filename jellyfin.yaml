@@ -185,11 +185,11 @@ spec:
       type: Directory
     name: mnt-clouddrive-backup-jellyfin-media
   - hostPath:
-      path: /mnt/clouddrive_backup/backup_redundand/jellyfin/opt
+      path: /mnt/clouddrive_backup/backup_redundant/jellyfin/opt
       type: Directory
-    name: mnt-clouddrive-backup-jellyfin-opt
+    name: mnt-clouddrive-backup-redundand-jellyfin-opt
   - hostPath:
-      path: /mnt/clouddrive_backup/backup_redundand/jellyfin/media
+      path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
       type: Directory
-    name: mnt-clouddrive-backup-jellyfin-media
+    name: mnt-clouddrive-backup-redundand-jellyfin-media
 
