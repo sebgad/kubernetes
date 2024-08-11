@@ -9,7 +9,7 @@ metadata:
     io.containers.autoupdate/backend: registry
     io.containers.autoupdate/mosquitto: registry
     io.containers.autoupdate/backup: registry
-    io.containers.autoupdate/backup-redundand: registry
+    io.containers.autoupdate/backup-redundant: registry
   labels:
     app: homeassistant
   name: homeassistant
@@ -70,7 +70,7 @@ spec:
         name: etc-timezone-host-1
       - mountPath: /etc/localtime
         name: etc-localtime-host-2
-  - name: backup-redundand
+  - name: backup-redundant
     image: localhost/restainer:latest
     env:
       - name: RESTIC_TAG
@@ -94,7 +94,7 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-redundand-homeassistant
+        name: mnt-clouddrive-backup-redundant-homeassistant
       - mountPath: /data
         name: opt-pods-homeassistant
       - mountPath: /etc/timezone
@@ -124,9 +124,9 @@ spec:
       type: Directory
     name: opt-pods-homeassistant
   - hostPath:
-      path: /mnt/clouddrive_backup/backup_redundand/homeassistant
+      path: /mnt/clouddrive_backup/backup_redundant/homeassistant
       type: Directory
-    name: mnt-clouddrive-backup-redundand-homeassistant
+    name: mnt-clouddrive-backup-redundant-homeassistant
   - hostPath:
       path: /mnt/clouddrive_backup/backup/homeassistant
       type: Directory
