@@ -9,7 +9,8 @@ metadata:
     io.containers.autoupdate/backend: registry
     io.containers.autoupdate/backup-config: registry
     io.containers.autoupdate/backup-media: registry
-  creationTimestamp: "2024-07-21T10:23:33Z"
+    io.containers.autoupdate/backup-redundand-config: registry
+    io.containers.autoupdate/backup-redundand-media: registry
   labels:
     app: jellyfin
   name: jellyfin

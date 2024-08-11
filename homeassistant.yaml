@@ -1,0 +1,141 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.3
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.containers.autoupdate/backend: registry
+    io.containers.autoupdate/mosquitto: registry
+    io.containers.autoupdate/backup: registry
+    io.containers.autoupdate/backup-redundand: registry
+  labels:
+    app: homeassistant
+  name: homeassistant
+spec:
+  containers:
+  - args:
+    - /usr/sbin/mosquitto
+    - -c
+    - /mosquitto/config/mosquitto.conf
+    image: docker.io/library/eclipse-mosquitto:latest
+    name: mosquitto
+    volumeMounts:
+    - mountPath: /mosquitto/config
+      name: opt-pods-homeassistant-mosquitto_eclipse-config-host-0
+    - mountPath: /mosquitto/data
+      name: opt-pods-homeassistant-mosquitto_eclipse-data-host-1
+    - mountPath: /mosquitto/log
+      name: opt-pods-homeassistant-mosquitto_eclipse-log-host-2
+  - env:
+    - name: TZ
+      value: Europe/Berlin
+    image: ghcr.io/home-assistant/home-assistant:stable
+    name: backend
+    securityContext:
+      privileged: true
+      procMount: Unmasked
+    volumeMounts:
+    - mountPath: /config
+      name: opt-pods-homeassistant-homeassistant-host-0
+  - name: backup
+    image: localhost/restainer:latest
+    env:
+      - name: RESTIC_TAG
+        value: homeassistant
+      - name: RESTIC_FORGET_ARGS
+        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+      - name: RESTIC_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: jellyfin
+            key: restic_pw
+      - name: TERM
+        value: xterm
+      - name: BACKUP_CRON
+        value: "0 5 * * *"
+      - name: CHECK_CRON
+        value: "0 22 * * *"
+    args:
+      - tail
+      - -fn0
+      - /var/log/cron.log
+    volumeMounts:
+      - mountPath: /mnt/repo
+        name: mnt-clouddrive-backup-homeassistant
+      - mountPath: /data
+        name: opt-pods-homeassistant
+      - mountPath: /etc/timezone
+        name: etc-timezone-host-1
+      - mountPath: /etc/localtime
+        name: etc-localtime-host-2
+  - name: backup-redundand
+    image: localhost/restainer:latest
+    env:
+      - name: RESTIC_TAG
+        value: jellyfin-media
+      - name: RESTIC_FORGET_ARGS
+        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+      - name: RESTIC_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: jellyfin
+            key: restic_pw
+      - name: TERM
+        value: xterm
+      - name: BACKUP_CRON
+        value: "0 5 * * *"
+      - name: CHECK_CRON
+        value: "0 22 * * *"
+    args:
+      - tail
+      - -fn0
+      - /var/log/cron.log
+    volumeMounts:
+      - mountPath: /mnt/repo
+        name: mnt-clouddrive-backup-redundand-homeassistant
+      - mountPath: /data
+        name: opt-pods-homeassistant
+      - mountPath: /etc/timezone
+        name: etc-timezone-host-1
+      - mountPath: /etc/localtime
+        name: etc-localtime-host-2
+  hostNetwork: true
+  volumes:
+  - hostPath:
+      path: /opt/pods/homeassistant/mosquitto_eclipse/config
+      type: Directory
+    name: opt-pods-homeassistant-mosquitto_eclipse-config-host-0
+  - hostPath:
+      path: /opt/pods/homeassistant/mosquitto_eclipse/data
+      type: Directory
+    name: opt-pods-homeassistant-mosquitto_eclipse-data-host-1
+  - hostPath:
+      path: /opt/pods/homeassistant/mosquitto_eclipse/log
+      type: Directory
+    name: opt-pods-homeassistant-mosquitto_eclipse-log-host-2
+  - hostPath:
+      path: /opt/pods/homeassistant/homeassistant
+      type: Directory
+    name: opt-pods-homeassistant-homeassistant-host-0
+  - hostPath:
+      path: /opt/pods/homeassistant
+      type: Directory
+    name: opt-pods-homeassistant
+  - hostPath:
+      path: /mnt/clouddrive_backup/backup_redundand/homeassistant
+      type: Directory
+    name: mnt-clouddrive-backup-redundand-homeassistant
+  - hostPath:
+      path: /mnt/clouddrive_backup/backup/homeassistant
+      type: Directory
+    name: mnt-clouddrive-backup-homeassistant
+  - hostPath:
+      path: /etc/timezone
+      type: Directory
+    name: etc-timezone-host-1
+  - hostPath:
+      path: /etc/localtime
+      type: Directory
+    name: etc-localtime-host-2
