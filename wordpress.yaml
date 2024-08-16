@@ -1,0 +1,153 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.3
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.containers.autoupdate/database: registry
+    io.containers.autoupdate/webserver: registry
+    io.containers.autoupdate/backup: registry
+    io.containers.autoupdate/backup-redundant: registry
+  labels:
+    app: wordpress
+  name: wordpress
+spec:
+  containers:
+    - name: database
+      image: docker.io/library/mariadb:latest
+      args:
+        - mariadbd
+      env:
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress
+              key: db_wordpress_pw
+        - name: MARIADB_DATABASE
+          value: wordpress
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress
+              key: db_root_pw
+        - name: MARIADB_USER
+          value: wordpress
+      ports:
+        - containerPort: 80
+          hostPort: 8081
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: opt-pods-wordpress-database-data-host-0
+        - mountPath: /docker-entrypoint-initdb.d
+          name: opt-pods-wordpress-database-entrypoint-host-1
+    - name: webserver
+      image: docker.io/library/wordpress:latest
+      args:
+        - apache2-foreground
+      env:
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress
+              key: db_wordpress_pw
+        - name: WORDPRESS_DB_HOST
+          value: 127.0.0.1
+        - name: WORDPRESS_DB_USER
+          value: wordpress
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+      volumeMounts:
+        - mountPath: /var/www/html
+          name: opt-wordpress-host-0
+    - name: backup
+      image: localhost/restainer:latest
+      env:
+        - name: MARIADB_BACKUP_USER
+          value: wordpress
+        - name: MARIADB_BACKUP_PW
+          valueFrom:
+            secretKeyRef:
+              name: wordpress
+              key: db_wordpress_pw
+        - name: RESTIC_TAG
+          value: wordpress
+        - name: RESTIC_FORGET_ARGS
+          value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+        - name: RESTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress
+              key: restic_pw
+        - name: TERM
+          value: xterm
+        - name: BACKUP_CRON
+          value: "0 5 * * *"
+        - name: CHECK_CRON
+          value: "0 22 * * *"
+      args:
+        - tail
+        - -fn0
+        - /var/log/cron.log
+      volumeMounts:
+        - mountPath: /mnt/repo
+          name: mnt-clouddrive-backup-wordpress
+        - mountPath: /data
+          name: opt-wordpress-host-0
+        - mountPath: /etc/timezone
+          name: etc-timezone-host-1
+        - mountPath: /etc/localtime
+          name: etc-localtime-host-2
+    - name: backup-redundant
+      image: localhost/restainer:latest
+      env:
+        - name: RESTIC_TAG
+          value: wordpress
+        - name: RESTIC_FORGET_ARGS
+          value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
+        - name: RESTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress
+              key: restic_pw
+        - name: TERM
+          value: xterm
+        - name: BACKUP_CRON
+          value: "0 5 * * *"
+        - name: CHECK_CRON
+          value: "0 22 * * *"
+      args:
+        - tail
+        - -fn0
+        - /var/log/cron.log
+      volumeMounts:
+        - mountPath: /mnt/repo
+          name: mnt-clouddrive-backup-redundant-wordpress
+        - mountPath: /data
+          name: opt-wordpress-host-0
+        - mountPath: /etc/timezone
+          name: etc-timezone-host-1
+        - mountPath: /etc/localtime
+          name: etc-localtime-host-2
+  volumes:
+    - hostPath:
+        path: /opt/pods/wordpress/database/data
+        type: Directory
+      name: opt-pods-wordpress-database-data-host-0
+    - hostPath:
+        path: /opt/pods/wordpress/database/entrypoint
+        type: Directory
+      name: opt-pods-wordpress-database-entrypoint-host-1
+    - hostPath:
+        path: /opt/wordpress
+        type: Directory
+      name: opt-wordpress-host-0
+    - hostPath:
+        path: /mnt/clouddrive_backup/backup/wordpress
+        type: Directory
+      name: mnt-clouddrive-backup-wordpress
+    - hostPath:
+        path: /mnt/clouddrive_backup/backup_redundant/wordpress
+        type: Directory
+      name: mnt-clouddrive-backup-redundant-wordpress

@@ -49,7 +49,7 @@ spec:
       - name: RESTIC_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: jellyfin
+            name: homeassistant
             key: restic_pw
       - name: TERM
         value: xterm
