@@ -132,6 +132,14 @@ spec:
           name: etc-localtime-host-2
   volumes:
     - hostPath:
+        path: /etc/timezone
+        type: File
+      name: etc-timezone-host-1
+    - hostPath:
+        path: /etc/localtime
+        type: File
+      name: etc-localtime-host-2
+    - hostPath:
         path: /opt/pods/wordpress/database/data
         type: Directory
       name: opt-pods-wordpress-database-data-host-0
