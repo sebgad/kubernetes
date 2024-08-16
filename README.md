@@ -65,10 +65,11 @@ data:
   password: <Password>
 
 ```
-**Attention:** The password is base64 encoded, you can run the following command to encode your password:
+**Attention:** The password is base64 encoded, you can run the following command to encode your password. Consider
+the *space* before ``` echo ``` to avoid entry in bash_history.
 
 ```bash
-echo -n '<password>' | base64
+ echo -n '<password>' | base64
 ```
 
 You can import the secret by the command:
