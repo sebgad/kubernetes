@@ -73,6 +73,15 @@ spec:
     - name: backup-config
       image: localhost/restainer:latest
       env:
+        - name: MARIADB_DATABASE
+          value: nextcloud
+        - name: MARIADB_BACKUP_USER
+          value: nextadmin
+        - name: MARIADB_BACKUP_PW
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud
+              key: db_nextcloud_pw
         - name: RESTIC_TAG
           value: nextcloud-config
         - name: RESTIC_FORGET_ARGS
@@ -135,6 +144,15 @@ spec:
     - name: backup-redundant-config
       image: localhost/restainer:latest
       env:
+        - name: MARIADB_DATABASE
+          value: nextcloud
+        - name: MARIADB_BACKUP_USER
+          value: nextadmin
+        - name: MARIADB_BACKUP_PW
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud
+              key: db_nextcloud_pw
         - name: RESTIC_TAG
           value: nextcloud-config
         - name: RESTIC_FORGET_ARGS
@@ -195,6 +213,14 @@ spec:
         - mountPath: /etc/localtime
           name: etc-localtime-host-2
   volumes:
+    - hostPath:
+        path: /etc/timezone
+        type: Directory
+      name: etc-timezone-host-1
+    - hostPath:
+        path: /etc/localtime
+        type: Directory
+      name: etc-localtime-host-2
     - hostPath:
         path: /opt/pods/nextcloud/redis/config
         type: Directory

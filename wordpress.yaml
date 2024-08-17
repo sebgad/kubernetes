@@ -64,6 +64,8 @@ spec:
     - name: backup
       image: localhost/restainer:latest
       env:
+        - name: MARIADB_DATABASE
+          value: wordpress
         - name: MARIADB_BACKUP_USER
           value: wordpress
         - name: MARIADB_BACKUP_PW
