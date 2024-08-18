@@ -10,6 +10,7 @@ metadata:
     io.containers.autoupdate/database: registry
     io.containers.autoupdate/image-previewer: registry
     io.containers.autoupdate/redis: registry
+    io.containers.autoupdate/webserver: registry
   labels:
     app: nextcloud
   name: nextcloud
@@ -41,11 +42,17 @@ spec:
           name: opt-pods-nextcloud-database-data-host-1
     - name: redis
       image: docker.io/library/redis:latest
-      args:
-        - /usr/local/etc/redis/redis.conf
+      env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud
+              key: redis_pw
+        #- name: REDIS_BIND
+        #  value: "127.0.0.1"
+      command: ["redis-server"]
+      args: ["--requirepass", "$(REDIS_PASSWORD)"]
       volumeMounts:
-        - mountPath: /usr/local/etc/redis
-          name: opt-pods-nextcloud-redis-host-0
         - mountPath: /data
           name: redis-persistance-volume
     - name: image-previewer
@@ -57,12 +64,14 @@ spec:
           value: 8000
       securityContext: {}
     - name: backend
-      image: docker.io/library/nextcloud:fpm
+      image: docker.io/library/nextcloud
       ports:
-        - containerPort: 9000
-          hostPort: 9090
-      args:
-        - php-fpm
+        - containerPort: 80
+          hostPort: 8083
+      #securityContext:
+      #  runAsUser: 1000
+      #  runAsGroup: 1000
+      #  fsGroup: 1000
       volumeMounts:
         - mountPath: /var/www/html
           name: opt-pods-nextcloud-backend-html-host-0
@@ -81,7 +90,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: nextcloud
-              key: db_nextcloud_pw
+              key: database_user_pw
         - name: RESTIC_TAG
           value: nextcloud-config
         - name: RESTIC_FORGET_ARGS
@@ -134,7 +143,7 @@ spec:
         - /var/log/cron.log
       volumeMounts:
         - mountPath: /mnt/repo
-          name: mnt-clouddrive-backup-nextcloud
+          name: mnt-clouddrive-backup-nextcloud-data
         - mountPath: /data
           name: mnt-clouddrive-nextcloud-host-2
         - mountPath: /etc/timezone
@@ -152,7 +161,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: nextcloud
-              key: db_nextcloud_pw
+              key: database_user_pw
         - name: RESTIC_TAG
           value: nextcloud-config
         - name: RESTIC_FORGET_ARGS
@@ -222,11 +231,7 @@ spec:
         type: Directory
       name: etc-localtime-host-2
     - hostPath:
-        path: /opt/pods/nextcloud/redis/config
-        type: Directory
-      name: opt-pods-nextcloud-redis-host-0
-    - hostPath:
-        path: /opt/pods/nextcloud/redis/persisence
+        path: /opt/pods/nextcloud/redis/persistance
         type: Directory
       name: redis-persistance-volume
     - hostPath:
@@ -269,3 +274,4 @@ spec:
         path: /mnt/clouddrive_backup/backup_redundant/nextcloud/data
         type: Directory
       name: mnt-clouddrive-backup-redundant-nextcloud-data
+
