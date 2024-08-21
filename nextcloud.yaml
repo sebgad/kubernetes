@@ -11,6 +11,10 @@ metadata:
     io.containers.autoupdate/image-previewer: registry
     io.containers.autoupdate/redis: registry
     io.containers.autoupdate/webserver: registry
+    io.containers.autoupdate/backup-config: registry
+    io.containers.autoupdate/backup-data: registry
+    io.containers.autoupdate/backup-redundant-config: registry
+    io.containers.autoupdate/backup-redundant-data: registry
   labels:
     app: nextcloud
   name: nextcloud
