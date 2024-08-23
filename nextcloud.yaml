@@ -11,6 +11,7 @@ metadata:
     io.containers.autoupdate/image-previewer: registry
     io.containers.autoupdate/redis: registry
     io.containers.autoupdate/webserver: registry
+    io.containers.autoupdate/antivirus: registry
     io.containers.autoupdate/backup-config: registry
     io.containers.autoupdate/backup-data: registry
     io.containers.autoupdate/backup-redundant-config: registry
@@ -44,6 +45,8 @@ spec:
           name: opt-pods-nextcloud-database-entrypoint-host-0
         - mountPath: /var/lib/mysql
           name: opt-pods-nextcloud-database-data-host-1
+    - name: antivirus
+      image: docker.io/clamav/clamav
     - name: redis
       image: docker.io/library/redis:latest
       env:
