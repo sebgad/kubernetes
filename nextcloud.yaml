@@ -55,8 +55,6 @@ spec:
             secretKeyRef:
               name: nextcloud
               key: redis_pw
-        #- name: REDIS_BIND
-        #  value: "127.0.0.1"
       command: ["redis-server"]
       args: ["--requirepass", "$(REDIS_PASSWORD)"]
       volumeMounts:
@@ -65,7 +63,9 @@ spec:
     - name: image-previewer
       image: docker.io/h2non/imaginary:latest
       args:
-        - -enable-url-source
+        - "-enable-url-source"
+        - "-concurrency"
+        - "50"
       env:
         - name: PORT
           value: 8000
@@ -75,10 +75,6 @@ spec:
       ports:
         - containerPort: 80
           hostPort: 8083
-      #securityContext:
-      #  runAsUser: 1000
-      #  runAsGroup: 1000
-      #  fsGroup: 1000
       volumeMounts:
         - mountPath: /var/www/html
           name: opt-pods-nextcloud-backend-html-host-0
