@@ -1,7 +1,3 @@
-# Save the output of this file and use kubectl create -f to import
-# it into Kubernetes.
-#
-# Created with podman-4.9.3
 apiVersion: v1
 kind: Pod
 metadata:
@@ -23,11 +19,11 @@ spec:
       hostPort: 8096
     volumeMounts:
     - mountPath: /config
-      name: opt-pods-jellyfin-config-host-0
+      name: jellyfin-config
     - mountPath: /cache
-      name: opt-pods-jellyfin-cache-host-1
+      name: jellyfin-cache
     - mountPath: /media
-      name: mnt-clouddrive-jellyfin-host-2
+      name: jellyfin-media
   - name: backup-config
     image: localhost/restainer:latest
     env:
@@ -52,13 +48,13 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-jellyfin-opt
+        name: jellyfin-backup-repo-config
       - mountPath: /data
-        name: opt-pods-jellyfin
+        name: jellyfin-backup-config
       - mountPath: /etc/timezone
-        name: etc-timezone-host-1
+        name: etc-timezone
       - mountPath: /etc/localtime
-        name: etc-localtime-host-2
+        name: etc-localtime
   - name: backup-media
     image: localhost/restainer:latest
     env:
@@ -83,13 +79,13 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-jellyfin-media
+        name: jellyfin-backup-repo-media
       - mountPath: /data
-        name: mnt-clouddrive-jellyfin-host-2
+        name: jellyfin-media
       - mountPath: /etc/timezone
-        name: etc-timezone-host-1
+        name: etc-timezone
       - mountPath: /etc/localtime
-        name: etc-localtime-host-2
+        name: etc-localtime
   - name: backup-redundant-config
     image: localhost/restainer:latest
     env:
@@ -114,13 +110,13 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-redundant-jellyfin-opt
+        name: jellyfin-backup-redundant-repo-config
       - mountPath: /data
-        name: opt-pods-jellyfin
+        name: jellyfin-backup-config
       - mountPath: /etc/timezone
-        name: etc-timezone-host-1
+        name: etc-timezone
       - mountPath: /etc/localtime
-        name: etc-localtime-host-2
+        name: etc-localtime
   - name: backup-redundant-media
     image: localhost/restainer:latest
     env:
@@ -145,52 +141,51 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-redundant-jellyfin-media
+        name: jellyfin-backup-redundant-repo-media
       - mountPath: /data
-        name: mnt-clouddrive-jellyfin-host-2
+        name: jellyfin-media
       - mountPath: /etc/timezone
-        name: etc-timezone-host-1
+        name: etc-timezone
       - mountPath: /etc/localtime
-        name: etc-localtime-host-2
+        name: etc-localtime
   volumes:
   - hostPath:
       path: /etc/timezone
       type: Directory
-    name: etc-timezone-host-1
+    name: etc-timezone
   - hostPath:
       path: /etc/localtime
       type: Directory
-    name: etc-localtime-host-2
+    name: etc-localtime
   - hostPath:
       path: /opt/pods/jellyfin/config
       type: Directory
-    name: opt-pods-jellyfin-config-host-0
+    name: jellyfin-config
   - hostPath:
       path: /opt/pods/jellyfin/cache
       type: Directory
-    name: opt-pods-jellyfin-cache-host-1
+    name: jellyfin-cache
   - hostPath:
       path: /mnt/clouddrive/jellyfin
       type: Directory
-    name: mnt-clouddrive-jellyfin-host-2
+    name: jellyfin-media
   - hostPath:
       path: /opt/pods/jellyfin
       type: Directory
-    name: opt-pods-jellyfin
+    name: jellyfin-backup-config
   - hostPath:
       path: /mnt/clouddrive_backup/backup/jellyfin/opt
       type: Directory
-    name: mnt-clouddrive-backup-jellyfin-opt
+    name: jellyfin-backup-repo-config
   - hostPath:
       path: /mnt/clouddrive_backup/backup/jellyfin/media
       type: Directory
-    name: mnt-clouddrive-backup-jellyfin-media
+    name: jellyfin-backup-repo-media
   - hostPath:
       path: /mnt/clouddrive_backup/backup_redundant/jellyfin/opt
       type: Directory
-    name: mnt-clouddrive-backup-redundant-jellyfin-opt
+    name: jellyfin-backup-redundant-repo-config
   - hostPath:
       path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
       type: Directory
-    name: mnt-clouddrive-backup-redundant-jellyfin-media
-
+    name: jellyfin-backup-redundant-repo-media

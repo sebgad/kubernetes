@@ -58,10 +58,10 @@ spec:
         - mountPath: /data/
           name: opt-pods-vaultwarden-vaultwarden-host-0
         - mountPath: /etc/timezone
-          name: etc-timezone-host-1
+          name: etc-timezone
           readOnly: true
         - mountPath: /etc/localtime
-          name: etc-localtime-host-2
+          name: etc-localtime
           readOnly: true
     - name: database
       image: docker.io/library/mariadb:latest
@@ -124,9 +124,9 @@ spec:
         - mountPath: /data
           name: opt-pods-vaultwarden-host-1
         - mountPath: /etc/timezone
-          name: etc-timezone-host-1
+          name: etc-timezone
         - mountPath: /etc/localtime
-          name: etc-localtime-host-2
+          name: etc-localtime
         - mountPath: /var/log
           name: opt-pods-vaultwarden-restainer-backup
     - name: backup-redundant
@@ -166,20 +166,20 @@ spec:
         - mountPath: /data
           name: opt-pods-vaultwarden-host-1
         - mountPath: /etc/timezone
-          name: etc-timezone-host-1
+          name: etc-timezone
         - mountPath: /etc/localtime
-          name: etc-localtime-host-2
+          name: etc-localtime
         - mountPath: /var/log
           name: opt-pods-vaultwarden-restainer-backup-redundant
   volumes:
     - hostPath:
         path: /etc/timezone
         type: File
-      name: etc-timezone-host-1
+      name: etc-timezone
     - hostPath:
         path: /etc/localtime
         type: File
-      name: etc-localtime-host-2
+      name: etc-localtime
     - hostPath:
         path: /opt/pods/vaultwarden/database/data
         type: Directory
