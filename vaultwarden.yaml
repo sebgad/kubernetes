@@ -127,6 +127,8 @@ spec:
           name: etc-timezone-host-1
         - mountPath: /etc/localtime
           name: etc-localtime-host-2
+        - mountPath: /var/log
+          name: opt-pods-vaultwarden-restainer-backup
     - name: backup-redundant
       image: localhost/restainer:latest
       env:
@@ -167,6 +169,8 @@ spec:
           name: etc-timezone-host-1
         - mountPath: /etc/localtime
           name: etc-localtime-host-2
+        - mountPath: /var/log
+          name: opt-pods-vaultwarden-restainer-backup-redundant
   volumes:
     - hostPath:
         path: /etc/timezone
@@ -200,3 +204,11 @@ spec:
         path: /opt/pods/vaultwarden
         type: Directory
       name: opt-pods-vaultwarden-host-1
+    - hostPath:
+        path:  /opt/pods/vaultwarden/restainer/backup
+        type:  Directory
+      name:  opt-pods-vaultwarden-restainer-backup
+    - hostPath:
+        path:  /opt/pods/vaultwarden/restainer/backup-redundant
+        type:  Directory
+      name:  opt-pods-vaultwarden-restainer-backup-redundant

@@ -70,6 +70,8 @@ spec:
         name: etc-timezone-host-1
       - mountPath: /etc/localtime
         name: etc-localtime-host-2
+      - mountPath: /var/log
+        name: opt-pods-homeassistant-restainer-backup
   - name: backup-redundant
     image: localhost/restainer:latest
     env:
@@ -101,6 +103,8 @@ spec:
         name: etc-timezone-host-1
       - mountPath: /etc/localtime
         name: etc-localtime-host-2
+      - mountPath: /var/log
+        name: opt-pods-homeassistant-restainer-backup-redundant
   hostNetwork: true
   volumes:
   - hostPath:
@@ -139,3 +143,12 @@ spec:
       path: /etc/localtime
       type: Directory
     name: etc-localtime-host-2
+  - hostPath:
+      path: /opt/pods/homeassistant/restainer/backup
+      type: Directory
+    name: opt-pods-homeassistant-restainer-backup
+  - hostPath:
+      path: /opt/pods/homeassistant/restainer/backup-redundant
+      type: Directory
+    name: opt-pods-homeassistant-restainer-backup-redundant
+
