@@ -8,8 +8,8 @@ metadata:
   annotations:
     io.containers.autoupdate/database: registry
     io.containers.autoupdate/webserver: registry
-    io.containers.autoupdate/backup: registry
-    io.containers.autoupdate/backup-redundant: registry
+    io.containers.autoupdate/backup: image
+    io.containers.autoupdate/backup-redundant: image
   labels:
     app: wordpress
   name: wordpress
@@ -150,7 +150,7 @@ spec:
         type: Directory
       name: opt-pods-wordpress-database-entrypoint-host-1
     - hostPath:
-        path: /opt/wordpress
+        path: /opt/pods/wordpress
         type: Directory
       name: opt-wordpress-host-0
     - hostPath:
