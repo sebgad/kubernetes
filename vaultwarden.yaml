@@ -89,6 +89,7 @@ spec:
         - mariadbd
     - name: backup
       image: localhost/restainer:latest
+      imagePullPolicy: Never
       env:
         - name: MARIADB_BACKUP_USER
           value: vaultwarden
@@ -131,6 +132,7 @@ spec:
           name: opt-pods-vaultwarden-restainer-backup
     - name: backup-redundant
       image: localhost/restainer:latest
+      imagePullPolicy: Never
       env:
         - name: MARIADB_BACKUP_USER
           value: vaultwarden

@@ -26,6 +26,7 @@ spec:
       name: jellyfin-media
   - name: backup-config
     image: localhost/restainer:latest
+    imagePullPolicy: Never
     env:
       - name: RESTIC_TAG
         value: jellyfin-config
@@ -57,6 +58,7 @@ spec:
         name: etc-localtime
   - name: backup-media
     image: localhost/restainer:latest
+    imagePullPolicy: Never
     env:
       - name: RESTIC_TAG
         value: jellyfin-media
@@ -88,6 +90,7 @@ spec:
         name: etc-localtime
   - name: backup-redundant-config
     image: localhost/restainer:latest
+    imagePullPolicy: Never
     env:
       - name: RESTIC_TAG
         value: jellyfin-config
@@ -119,6 +122,7 @@ spec:
         name: etc-localtime
   - name: backup-redundant-media
     image: localhost/restainer:latest
+    imagePullPolicy: Never
     env:
       - name: RESTIC_TAG
         value: jellyfin-media

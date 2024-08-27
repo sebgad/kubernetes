@@ -41,6 +41,7 @@ spec:
       name: opt-pods-homeassistant-homeassistant-host-0
   - name: backup
     image: localhost/restainer:latest
+    imagePullPolicy: Never
     env:
       - name: RESTIC_TAG
         value: homeassistant
@@ -74,6 +75,7 @@ spec:
         name: opt-pods-homeassistant-restainer-backup
   - name: backup-redundant
     image: localhost/restainer:latest
+    imagePullPolicy: Never
     env:
       - name: RESTIC_TAG
         value: jellyfin-media

@@ -84,6 +84,7 @@ spec:
           name: mnt-clouddrive-nextcloud-host-2
     - name: backup-config
       image: localhost/restainer:latest
+      imagePullPolicy: Never
       env:
         - name: MARIADB_DATABASE
           value: nextcloud
@@ -124,6 +125,7 @@ spec:
           name: etc-localtime
     - name: backup-data
       image: localhost/restainer:latest
+      imagePullPolicy: Never
       env:
         - name: RESTIC_TAG
           value: nextcloud-data
@@ -155,6 +157,7 @@ spec:
           name: etc-localtime
     - name: backup-redundant-config
       image: localhost/restainer:latest
+      imagePullPolicy: Never
       env:
         - name: MARIADB_DATABASE
           value: nextcloud
@@ -195,6 +198,7 @@ spec:
           name: etc-localtime
     - name: backup-redundant-data
       image: localhost/restainer:latest
+      imagePullPolicy: Never
       env:
         - name: RESTIC_TAG
           value: nextcloud-data
