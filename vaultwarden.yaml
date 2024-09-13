@@ -88,8 +88,7 @@ spec:
       args:
         - mariadbd
     - name: backup
-      image: localhost/restainer:latest
-      imagePullPolicy: Never
+      image: docker.io/sebgad/restainer:latest
       env:
         - name: MARIADB_BACKUP_USER
           value: vaultwarden
@@ -131,8 +130,7 @@ spec:
         - mountPath: /var/log
           name: opt-pods-vaultwarden-restainer-backup
     - name: backup-redundant
-      image: localhost/restainer:latest
-      imagePullPolicy: Never
+      image: docker.io/sebgad/restainer:latest
       env:
         - name: MARIADB_BACKUP_USER
           value: vaultwarden

@@ -62,8 +62,7 @@ spec:
         - mountPath: /var/www/html
           name: opt-wordpress-host-0
     - name: backup
-      image: localhost/restainer:latest
-      imagePullPolicy: Never
+      image: docker.io/sebgad/restainer:latest
       env:
         - name: MARIADB_DATABASE
           value: wordpress
@@ -103,8 +102,7 @@ spec:
         - mountPath: /etc/localtime
           name: etc-localtime
     - name: backup-redundant
-      image: localhost/restainer:latest
-      imagePullPolicy: Never
+      image: docker.io/sebgad/restainer:latest
       env:
         - name: RESTIC_TAG
           value: wordpress

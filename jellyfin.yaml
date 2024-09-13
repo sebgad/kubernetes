@@ -19,14 +19,13 @@ spec:
       hostPort: 8096
     volumeMounts:
     - mountPath: /config
-      name: jellyfin-config
+      name: mnt-jellyfin-config
     - mountPath: /cache
-      name: jellyfin-cache
+      name: mnt-jellyfin-cache
     - mountPath: /media
-      name: jellyfin-media
+      name: mnt-jellyfin-media
   - name: backup-config
-    image: localhost/restainer:latest
-    imagePullPolicy: Never
+    image: docker.io/sebgad/restainer:latest
     env:
       - name: RESTIC_TAG
         value: jellyfin-config
@@ -49,16 +48,15 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: jellyfin-backup-repo-config
+        name: mnt-jellyfin-backup-config-host-path
       - mountPath: /data
-        name: jellyfin-backup-config
+        name: mnt-jellyfin-config
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
   - name: backup-media
-    image: localhost/restainer:latest
-    imagePullPolicy: Never
+    image: docker.io/sebgad/restainer:latest
     env:
       - name: RESTIC_TAG
         value: jellyfin-media
@@ -81,16 +79,15 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: jellyfin-backup-repo-media
+        name: mnt-jellyfin-backup-media-host-path
       - mountPath: /data
-        name: jellyfin-media
+        name: mnt-jellyfin-media
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
   - name: backup-redundant-config
-    image: localhost/restainer:latest
-    imagePullPolicy: Never
+    image: docker.io/sebgad/restainer:latest
     env:
       - name: RESTIC_TAG
         value: jellyfin-config
@@ -113,16 +110,15 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: jellyfin-backup-redundant-repo-config
+        name: mnt-jellyfin-backup-redundant-host-path
       - mountPath: /data
-        name: jellyfin-backup-config
+        name: mnt-jellyfin-config
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
   - name: backup-redundant-media
-    image: localhost/restainer:latest
-    imagePullPolicy: Never
+    image: docker.io/sebgad/restainer:latest
     env:
       - name: RESTIC_TAG
         value: jellyfin-media
@@ -145,9 +141,9 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: jellyfin-backup-redundant-repo-media
+        name: mnt-jellyfin-backup-redundant-media-host-path
       - mountPath: /data
-        name: jellyfin-media
+        name: mnt-jellyfin-media
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
@@ -164,32 +160,28 @@ spec:
   - hostPath:
       path: /opt/pods/jellyfin/config
       type: Directory
-    name: jellyfin-config
+    name: mnt-jellyfin-config
   - hostPath:
       path: /opt/pods/jellyfin/cache
       type: Directory
-    name: jellyfin-cache
+    name: mnt-jellyfin-cache
   - hostPath:
       path: /mnt/clouddrive/jellyfin
       type: Directory
-    name: jellyfin-media
-  - hostPath:
-      path: /opt/pods/jellyfin
-      type: Directory
-    name: jellyfin-backup-config
+    name: mnt-jellyfin-media
   - hostPath:
       path: /mnt/clouddrive_backup/backup/jellyfin/opt
       type: Directory
-    name: jellyfin-backup-repo-config
+    name: mnt-jellyfin-backup-config-host-path
   - hostPath:
       path: /mnt/clouddrive_backup/backup/jellyfin/media
       type: Directory
-    name: jellyfin-backup-repo-media
+    name: mnt-jellyfin-backup-media-host-path
   - hostPath:
       path: /mnt/clouddrive_backup/backup_redundant/jellyfin/opt
       type: Directory
-    name: jellyfin-backup-redundant-repo-config
+    name: mnt-jellyfin-backup-redundant-host-path
   - hostPath:
       path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
       type: Directory
-    name: jellyfin-backup-redundant-repo-media
+    name: mnt-jellyfin-backup-redundant-media-host-path

@@ -15,19 +15,19 @@ metadata:
   name: homeassistant
 spec:
   containers:
-  - args:
+  - image: docker.io/library/eclipse-mosquitto:latest
+    name: mosquitto
+    args:
     - /usr/sbin/mosquitto
     - -c
     - /mosquitto/config/mosquitto.conf
-    image: docker.io/library/eclipse-mosquitto:latest
-    name: mosquitto
     volumeMounts:
     - mountPath: /mosquitto/config
-      name: opt-pods-homeassistant-mosquitto_eclipse-config-host-0
+      name: mnt-homeassistant-mosquitto-config
     - mountPath: /mosquitto/data
-      name: opt-pods-homeassistant-mosquitto_eclipse-data-host-1
+      name: mnt-homeassistant-mosquitto-data
     - mountPath: /mosquitto/log
-      name: opt-pods-homeassistant-mosquitto_eclipse-log-host-2
+      name: mnt-homeassistant-mosquitto-log
   - env:
     - name: TZ
       value: Europe/Berlin
@@ -38,10 +38,9 @@ spec:
       procMount: Unmasked
     volumeMounts:
     - mountPath: /config
-      name: opt-pods-homeassistant-homeassistant-host-0
+      name: mnt-homeassistant-backend-config
   - name: backup
-    image: localhost/restainer:latest
-    imagePullPolicy: Never
+    image: docker.io/sebgad/restainer:latest
     env:
       - name: RESTIC_TAG
         value: homeassistant
@@ -64,27 +63,26 @@ spec:
       - /var/log/cron.log
     volumeMounts:
       - mountPath: /mnt/repo
-        name: mnt-clouddrive-backup-homeassistant
+        name: mnt-homeassistant-backup-host-path
       - mountPath: /data
-        name: opt-pods-homeassistant
+        name: mnt-homeassistant-backup-data-path
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
       - mountPath: /var/log
-        name: opt-pods-homeassistant-restainer-backup
+        name: mnt-homeassistant-backup-log-path
   - name: backup-redundant
-    image: localhost/restainer:latest
-    imagePullPolicy: Never
+    image: docker.io/sebgad/restainer:latest
     env:
       - name: RESTIC_TAG
-        value: jellyfin-media
+        value: homeassistant-redundant
       - name: RESTIC_FORGET_ARGS
         value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
       - name: RESTIC_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: jellyfin
+            name: homeassistant
             key: restic_pw
       - name: TERM
         value: xterm
@@ -100,35 +98,35 @@ spec:
       - mountPath: /mnt/repo
         name: mnt-clouddrive-backup-redundant-homeassistant
       - mountPath: /data
-        name: opt-pods-homeassistant
+        name: mnt-homeassistant-backup-data-path
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
       - mountPath: /var/log
-        name: opt-pods-homeassistant-restainer-backup-redundant
+        name: mnt-homeassistant-backup-redundant-log-path
   hostNetwork: true
   volumes:
   - hostPath:
       path: /opt/pods/homeassistant/mosquitto_eclipse/config
       type: Directory
-    name: opt-pods-homeassistant-mosquitto_eclipse-config-host-0
+    name: mnt-homeassistant-mosquitto-config
   - hostPath:
       path: /opt/pods/homeassistant/mosquitto_eclipse/data
       type: Directory
-    name: opt-pods-homeassistant-mosquitto_eclipse-data-host-1
+    name: mnt-homeassistant-mosquitto-data
   - hostPath:
       path: /opt/pods/homeassistant/mosquitto_eclipse/log
       type: Directory
-    name: opt-pods-homeassistant-mosquitto_eclipse-log-host-2
+    name: mnt-homeassistant-mosquitto-log
   - hostPath:
       path: /opt/pods/homeassistant/homeassistant
       type: Directory
-    name: opt-pods-homeassistant-homeassistant-host-0
+    name: mnt-homeassistant-backend-config
   - hostPath:
       path: /opt/pods/homeassistant
       type: Directory
-    name: opt-pods-homeassistant
+    name: mnt-homeassistant-backup-data-path
   - hostPath:
       path: /mnt/clouddrive_backup/backup_redundant/homeassistant
       type: Directory
@@ -136,7 +134,7 @@ spec:
   - hostPath:
       path: /mnt/clouddrive_backup/backup/homeassistant
       type: Directory
-    name: mnt-clouddrive-backup-homeassistant
+    name: mnt-homeassistant-backup-host-path
   - hostPath:
       path: /etc/timezone
       type: Directory
@@ -148,9 +146,9 @@ spec:
   - hostPath:
       path: /opt/pods/homeassistant/restainer/backup
       type: Directory
-    name: opt-pods-homeassistant-restainer-backup
+    name: mnt-homeassistant-backup-log-path
   - hostPath:
       path: /opt/pods/homeassistant/restainer/backup-redundant
       type: Directory
-    name: opt-pods-homeassistant-restainer-backup-redundant
+    name: mnt-homeassistant-backup-redundant-log-path
 
