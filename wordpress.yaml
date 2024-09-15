@@ -8,8 +8,8 @@ metadata:
   annotations:
     io.containers.autoupdate/database: registry
     io.containers.autoupdate/webserver: registry
-    io.containers.autoupdate/backup: image
-    io.containers.autoupdate/backup-redundant: image
+    io.containers.autoupdate/backup: registry
+    io.containers.autoupdate/backup-redundant: registry
   labels:
     app: wordpress
   name: wordpress

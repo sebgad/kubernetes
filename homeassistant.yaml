@@ -8,8 +8,8 @@ metadata:
   annotations:
     io.containers.autoupdate/backend: registry
     io.containers.autoupdate/mosquitto: registry
-    io.containers.autoupdate/backup: image
-    io.containers.autoupdate/backup-redundant: image
+    io.containers.autoupdate/backup: registry
+    io.containers.autoupdate/backup-redundant: registry
   labels:
     app: homeassistant
   name: homeassistant

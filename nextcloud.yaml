@@ -12,10 +12,10 @@ metadata:
     io.containers.autoupdate/redis: registry
     io.containers.autoupdate/webserver: registry
     io.containers.autoupdate/antivirus: registry
-    io.containers.autoupdate/backup-config: image
-    io.containers.autoupdate/backup-data: image
-    io.containers.autoupdate/backup-redundant-config: image
-    io.containers.autoupdate/backup-redundant-data: image
+    io.containers.autoupdate/backup-config: registry
+    io.containers.autoupdate/backup-data: registry
+    io.containers.autoupdate/backup-redundant-config: registry
+    io.containers.autoupdate/backup-redundant-data: registry
   labels:
     app: nextcloud
   name: nextcloud

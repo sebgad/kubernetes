@@ -9,8 +9,8 @@ metadata:
     bind-mount-options: /opt/pods/vaultwarden/database/data:Z
     io.containers.autoupdate/backend: registry
     io.containers.autoupdate/database: registry
-    io.containers.autoupdate/backup: image
-    io.containers.autoupdate/backup-redundant: image
+    io.containers.autoupdate/backup: registry
+    io.containers.autoupdate/backup-redundant: registry
   labels:
     app: vaultwarden
   name: vaultwarden

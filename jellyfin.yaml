@@ -3,10 +3,10 @@ kind: Pod
 metadata:
   annotations:
     io.containers.autoupdate/backend: registry
-    io.containers.autoupdate/backup-config: image
-    io.containers.autoupdate/backup-media: image
-    io.containers.autoupdate/backup-redundant-config: image
-    io.containers.autoupdate/backup-redundant-media: image
+    io.containers.autoupdate/backup-config: registry
+    io.containers.autoupdate/backup-media: registry
+    io.containers.autoupdate/backup-redundant-config: registry
+    io.containers.autoupdate/backup-redundant-media: registry
   labels:
     app: jellyfin
   name: jellyfin
