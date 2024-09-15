@@ -19,11 +19,11 @@ spec:
       hostPort: 8096
     volumeMounts:
     - mountPath: /config
-      name: mnt-jellyfin-config
+      name: mnt-jellyfin-backend-config-path
     - mountPath: /cache
-      name: mnt-jellyfin-cache
+      name: mnt-jellyfin-backend-cache-path
     - mountPath: /media
-      name: mnt-jellyfin-media
+      name: mnt-jellyfin-backend-media-path
   - name: backup-config
     image: docker.io/sebgad/restainer:latest
     env:
@@ -50,11 +50,13 @@ spec:
       - mountPath: /mnt/repo
         name: mnt-jellyfin-backup-config-host-path
       - mountPath: /data
-        name: mnt-jellyfin-config
+        name: mnt-jellyfin-backend-config-path
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
+      - mountPath: /var/log
+        name: mnt-jellyfin-backup-config-log-path
   - name: backup-media
     image: docker.io/sebgad/restainer:latest
     env:
@@ -81,11 +83,13 @@ spec:
       - mountPath: /mnt/repo
         name: mnt-jellyfin-backup-media-host-path
       - mountPath: /data
-        name: mnt-jellyfin-media
+        name: mnt-jellyfin-backend-media-path
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
+      - mountPath: /var/log
+        name: mnt-jellyfin-backup-media-log-path
   - name: backup-redundant-config
     image: docker.io/sebgad/restainer:latest
     env:
@@ -112,11 +116,13 @@ spec:
       - mountPath: /mnt/repo
         name: mnt-jellyfin-backup-redundant-host-path
       - mountPath: /data
-        name: mnt-jellyfin-config
+        name: mnt-jellyfin-backend-config-path
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
+      - mountPath: /var/log
+        name: mnt-jellyfin-backup-config-redundant-log-path
   - name: backup-redundant-media
     image: docker.io/sebgad/restainer:latest
     env:
@@ -143,11 +149,13 @@ spec:
       - mountPath: /mnt/repo
         name: mnt-jellyfin-backup-redundant-media-host-path
       - mountPath: /data
-        name: mnt-jellyfin-media
+        name: mnt-jellyfin-backend-media-path
       - mountPath: /etc/timezone
         name: etc-timezone
       - mountPath: /etc/localtime
         name: etc-localtime
+      - mountPath: /var/log
+        name: mnt-jellyfin-backup-media-redundant-log-path
   volumes:
   - hostPath:
       path: /etc/timezone
@@ -160,15 +168,15 @@ spec:
   - hostPath:
       path: /opt/pods/jellyfin/config
       type: Directory
-    name: mnt-jellyfin-config
+    name: mnt-jellyfin-backend-config-path
   - hostPath:
       path: /opt/pods/jellyfin/cache
       type: Directory
-    name: mnt-jellyfin-cache
+    name: mnt-jellyfin-backend-cache-path
   - hostPath:
       path: /mnt/clouddrive/jellyfin
       type: Directory
-    name: mnt-jellyfin-media
+    name: mnt-jellyfin-backend-media-path
   - hostPath:
       path: /mnt/clouddrive_backup/backup/jellyfin/opt
       type: Directory
@@ -185,3 +193,23 @@ spec:
       path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
       type: Directory
     name: mnt-jellyfin-backup-redundant-media-host-path
+  - hostPath:
+      path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
+      type: Directory
+    name: mnt-jellyfin-backup-redundant-media-host-path
+  - hostPath:
+      path: /opt/pods/jellyfin/backup_config
+      type: Directory
+    name: mnt-jellyfin-backup-config-log-path
+  - hostPath:
+      path: /opt/pods/jellyfin/backup_media
+      type: Directory
+    name: mnt-jellyfin-backup-media-log-path
+  - hostPath:
+      path: /opt/pods/jellyfin/backup_config_redundant
+      type: Directory
+    name: mnt-jellyfin-backup-config-redundant-log-path
+  - hostPath:
+      path: /opt/pods/jellyfin/backup_media_redundant
+      type: Directory
+    name: mnt-jellyfin-backup-media-redundant-log-path

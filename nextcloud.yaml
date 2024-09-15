@@ -42,9 +42,9 @@ spec:
           value: nextcloud
       volumeMounts:
         - mountPath: /docker-entrypoint-initdb.d
-          name: opt-pods-nextcloud-database-entrypoint-host-0
+          name: mnt-nextcloud-database-entrypoint-path
         - mountPath: /var/lib/mysql
-          name: opt-pods-nextcloud-database-data-host-1
+          name: mnt-nextcloud-database-lib-path
     - name: antivirus
       image: docker.io/clamav/clamav
     - name: redis
@@ -59,7 +59,7 @@ spec:
       args: ["--requirepass", "$(REDIS_PASSWORD)"]
       volumeMounts:
         - mountPath: /data
-          name: redis-persistance-volume
+          name: mnt-nextcloud-redis-persistance-path
     - name: image-previewer
       image: docker.io/h2non/imaginary:latest
       args:
@@ -77,11 +77,11 @@ spec:
           hostPort: 8083
       volumeMounts:
         - mountPath: /var/www/html
-          name: opt-pods-nextcloud-backend-html-host-0
+          name: mnt-nextcloud-backend-html-path
         - mountPath: /var/www/html/config
-          name: opt-pods-nextcloud-backend-config-host-1
+          name: mnt-nextcloud-backend-config-path
         - mountPath: /var/www/html/data
-          name: mnt-clouddrive-nextcloud-host-2
+          name: mnt-nextcloud-backend-data-path
     - name: backup-config
       image: docker.io/sebgad/restainer:latest
       env:
@@ -117,11 +117,13 @@ spec:
         - mountPath: /mnt/repo
           name: mnt-clouddrive-backup-nextcloud-opt
         - mountPath: /data
-          name: opt-pods-nextcloud
+          name: mnt-nextcloud-backup-data-path
         - mountPath: /etc/timezone
           name: etc-timezone
         - mountPath: /etc/localtime
           name: etc-localtime
+        - mountPath: /var/log
+          name: mnt-nextcloud-backup-config-log-path
     - name: backup-data
       image: docker.io/sebgad/restainer:latest
       env:
@@ -148,11 +150,13 @@ spec:
         - mountPath: /mnt/repo
           name: mnt-clouddrive-backup-nextcloud-data
         - mountPath: /data
-          name: mnt-clouddrive-nextcloud-host-2
+          name: mnt-nextcloud-backend-data-path
         - mountPath: /etc/timezone
           name: etc-timezone
         - mountPath: /etc/localtime
           name: etc-localtime
+        - mountPath: /var/log
+          name: mnt-nextcloud-backup-data-log-path
     - name: backup-redundant-config
       image: docker.io/sebgad/restainer:latest
       env:
@@ -186,13 +190,15 @@ spec:
         - /var/log/cron.log
       volumeMounts:
         - mountPath: /mnt/repo
-          name: mnt-clouddrive-backup-redundant-nextcloud-opt
+          name: mnt-nextcloud-backup-host-path
         - mountPath: /data
-          name: opt-pods-nextcloud
+          name: mnt-nextcloud-backup-data-path
         - mountPath: /etc/timezone
           name: etc-timezone
         - mountPath: /etc/localtime
           name: etc-localtime
+        - mountPath: /var/log
+          name: mnt-nextcloud-backup-config-redundant-log-path
     - name: backup-redundant-data
       image: docker.io/sebgad/restainer:latest
       env:
@@ -217,13 +223,15 @@ spec:
         - /var/log/cron.log
       volumeMounts:
         - mountPath: /mnt/repo
-          name: mnt-clouddrive-backup-redundant-nextcloud-data
+          name: mnt-nextcloud-backup-redundant-host-path
         - mountPath: /data
-          name: mnt-clouddrive-nextcloud-host-2
+          name: mnt-nextcloud-backend-data-path
         - mountPath: /etc/timezone
           name: etc-timezone
         - mountPath: /etc/localtime
           name: etc-localtime
+        - mountPath: /var/log
+          name: mnt-nextcloud-backup-data-redundant-log-path
   volumes:
     - hostPath:
         path: /etc/timezone
@@ -236,31 +244,31 @@ spec:
     - hostPath:
         path: /opt/pods/nextcloud/redis/persistance
         type: Directory
-      name: redis-persistance-volume
+      name: mnt-nextcloud-redis-persistance-path
     - hostPath:
         path: /opt/pods/nextcloud/backend/html
         type: Directory
-      name: opt-pods-nextcloud-backend-html-host-0
+      name: mnt-nextcloud-backend-html-path
     - hostPath:
         path: /opt/pods/nextcloud/backend/config
         type: Directory
-      name: opt-pods-nextcloud-backend-config-host-1
+      name: mnt-nextcloud-backend-config-path
     - hostPath:
         path: /mnt/clouddrive/nextcloud
         type: Directory
-      name: mnt-clouddrive-nextcloud-host-2
+      name: mnt-nextcloud-backend-data-path
     - hostPath:
         path: /opt/pods/nextcloud/database/entrypoint
         type: Directory
-      name: opt-pods-nextcloud-database-entrypoint-host-0
+      name: mnt-nextcloud-database-entrypoint-path
     - hostPath:
         path: /opt/pods/nextcloud/database/data
         type: Directory
-      name: opt-pods-nextcloud-database-data-host-1
+      name: mnt-nextcloud-database-lib-path
     - hostPath:
         path: /opt/pods/nextcloud
         type: Directory
-      name: opt-pods-nextcloud
+      name: mnt-nextcloud-backup-data-path
     - hostPath:
         path: /mnt/clouddrive_backup/backup/nextcloud/opt
         type: Directory
@@ -272,9 +280,25 @@ spec:
     - hostPath:
         path: /mnt/clouddrive_backup/backup_redundant/nextcloud/opt
         type: Directory
-      name: mnt-clouddrive-backup-redundant-nextcloud-opt
+      name: mnt-nextcloud-backup-host-path
     - hostPath:
         path: /mnt/clouddrive_backup/backup_redundant/nextcloud/data
         type: Directory
-      name: mnt-clouddrive-backup-redundant-nextcloud-data
+      name: mnt-nextcloud-backup-redundant-host-path
+    - hostPath:
+        path: /opt/pods/nextcloud/backup_config
+        type: Directory
+      name: mnt-nextcloud-backup-config-log-path
+    - hostPath:
+        path: /opt/pods/nextcloud/backup_config_redundant
+        type: Directory
+      name: mnt-nextcloud-backup-config-redundant-log-path
+    - hostPath:
+        path: /opt/pods/nextcloud/backup_data
+        type: Directory
+      name: mnt-nextcloud-backup-data-log-path
+    - hostPath:
+        path: /opt/pods/nextcloud/backup_data_redundant
+        type: Directory
+      name: mnt-nextcloud-backup-data-redundant-log-path
 

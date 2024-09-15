@@ -39,9 +39,9 @@ spec:
           hostPort: 8081
       volumeMounts:
         - mountPath: /var/lib/mysql
-          name: opt-pods-wordpress-database-data-host-0
+          name: mnt-wordpress-database-lib-path
         - mountPath: /docker-entrypoint-initdb.d
-          name: opt-pods-wordpress-database-entrypoint-host-1
+          name: mnt-wordpress-database-entrypoint-path
     - name: webserver
       image: docker.io/library/wordpress:latest
       args:
@@ -60,7 +60,7 @@ spec:
           value: wordpress
       volumeMounts:
         - mountPath: /var/www/html
-          name: opt-wordpress-host-0
+          name: mnt-wordpress-webserver-html-path
     - name: backup
       image: docker.io/sebgad/restainer:latest
       env:
@@ -94,9 +94,9 @@ spec:
         - /var/log/cron.log
       volumeMounts:
         - mountPath: /mnt/repo
-          name: mnt-clouddrive-backup-wordpress
+          name: mnt-wordpress-backup-host-path
         - mountPath: /data
-          name: opt-wordpress-host-0
+          name: mnt-wordpress-webserver-html-path
         - mountPath: /etc/timezone
           name: etc-timezone
         - mountPath: /etc/localtime
@@ -125,9 +125,9 @@ spec:
         - /var/log/cron.log
       volumeMounts:
         - mountPath: /mnt/repo
-          name: mnt-clouddrive-backup-redundant-wordpress
+          name: mnt-wordpress-backup-redundant-host-path
         - mountPath: /data
-          name: opt-wordpress-host-0
+          name: mnt-wordpress-webserver-html-path
         - mountPath: /etc/timezone
           name: etc-timezone
         - mountPath: /etc/localtime
@@ -144,20 +144,29 @@ spec:
     - hostPath:
         path: /opt/pods/wordpress/database/data
         type: Directory
-      name: opt-pods-wordpress-database-data-host-0
+      name: mnt-wordpress-database-lib-path
     - hostPath:
         path: /opt/pods/wordpress/database/entrypoint
         type: Directory
-      name: opt-pods-wordpress-database-entrypoint-host-1
+      name: mnt-wordpress-database-entrypoint-path
     - hostPath:
-        path: /opt/pods/wordpress
+        path: /opt/pods/wordpress/webserver
         type: Directory
-      name: opt-wordpress-host-0
+      name: mnt-wordpress-webserver-html-path
     - hostPath:
         path: /mnt/clouddrive_backup/backup/wordpress
         type: Directory
-      name: mnt-clouddrive-backup-wordpress
+      name: mnt-wordpress-backup-host-path
     - hostPath:
         path: /mnt/clouddrive_backup/backup_redundant/wordpress
         type: Directory
-      name: mnt-clouddrive-backup-redundant-wordpress
+      name: mnt-wordpress-backup-redundant-host-path
+    - hostPath:
+        path: /opt/pods/wordpress/backup
+        type: Directory
+      name: mnt-wordpress-backup-log-path
+    - hostPath:
+        path: /opt/pods/wordpress/backup_redundant
+        type: Directory
+      name: mnt-wordpress-backup-redundant-log-path
+

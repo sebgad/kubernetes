@@ -144,11 +144,11 @@ spec:
       type: Directory
     name: etc-localtime
   - hostPath:
-      path: /opt/pods/homeassistant/restainer/backup
+      path: /opt/pods/homeassistant/backup
       type: Directory
     name: mnt-homeassistant-backup-log-path
   - hostPath:
-      path: /opt/pods/homeassistant/restainer/backup-redundant
+      path: /opt/pods/homeassistant/backup-redundant
       type: Directory
     name: mnt-homeassistant-backup-redundant-log-path
 
