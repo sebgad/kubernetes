@@ -148,7 +148,7 @@ spec:
       type: Directory
     name: mnt-homeassistant-backup-log-path
   - hostPath:
-      path: /opt/pods/homeassistant/backup-redundant
+      path: /opt/pods/homeassistant/backup_redundant
       type: Directory
     name: mnt-homeassistant-backup-redundant-log-path
 
