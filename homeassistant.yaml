@@ -21,6 +21,11 @@ spec:
     - /usr/sbin/mosquitto
     - -c
     - /mosquitto/config/mosquitto.conf
+    ports:
+    - containerPort: 1883 #MQTT
+      hostPort: 1883
+    - containerPort: 9001 #Websocket
+      hostPort: 9001
     volumeMounts:
     - mountPath: /mosquitto/config
       name: mnt-homeassistant-mosquitto-config
@@ -28,10 +33,10 @@ spec:
       name: mnt-homeassistant-mosquitto-data
     - mountPath: /mosquitto/log
       name: mnt-homeassistant-mosquitto-log
-  - env:
-    - name: TZ
-      value: Europe/Berlin
-    image: ghcr.io/home-assistant/home-assistant:stable
+    env:
+      - name: TZ
+        value: Europe/Berlin
+  - image: ghcr.io/home-assistant/home-assistant:stable
     name: backend
     securityContext:
       privileged: true
@@ -39,6 +44,9 @@ spec:
     volumeMounts:
     - mountPath: /config
       name: mnt-homeassistant-backend-config
+    ports:
+      - containerPort: 8123
+        hostPort: 8123
   - name: backup
     image: docker.io/sebgad/restainer:latest
     env:
@@ -105,7 +113,6 @@ spec:
         name: etc-localtime
       - mountPath: /var/log
         name: mnt-homeassistant-backup-redundant-log-path
-  hostNetwork: true
   volumes:
   - hostPath:
       path: /opt/pods/homeassistant/mosquitto_eclipse/config
