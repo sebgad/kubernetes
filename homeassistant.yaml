@@ -36,12 +36,48 @@ spec:
     env:
       - name: TZ
         value: Europe/Berlin
+  - image: docker.io/grafana/grafana
+    name: grafana
+    ports:
+      - containerPort: 3000
+        HostPort: 8084
+    volumeMounts:
+    - mountPath: /var/lib/grafana
+      name: mnt-homeassistant-grafana
+  - image: docker.io/library/influxdb
+    name: influxdb
+#    ports:
+#      - containerPort: 8086
+#        HostPort: 8086
+    env:
+      - name: DOCKER_INFLUXDB_INIT_MODE
+        value: setup
+      - name: DOCKER_INFLUXDB_INIT_USERNAME
+        value: homeassistant
+      - name: DOCKER_INFLUXDB_INIT_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homeassistant
+            key: influxdb_user_pw
+      - name: DOCKER_INFLUXDB_INIT_ORG
+        value: sebastianyue
+      - name: DOCKER_INFLUXDB_INIT_BUCKET
+        value: homeassistant
+    volumeMounts:
+    - mountPath: /var/lib/influxdb2
+      name: mnt-homeassistant-influxdb-data
+    - mountPath: /etc/influxdb2
+      name: mnt-homeassistant-influxdb-config
   - image: ghcr.io/home-assistant/home-assistant:stable
     name: backend
     securityContext:
-      privileged: true
       procMount: Unmasked
+      capabilities:
+        add:
+          - SYS_RAWIO
     volumeMounts:
+    - mountPath: /dev/ttyACM0
+      name: dev-homeassistant-backend-zigbee-dongle
     - mountPath: /config
       name: mnt-homeassistant-backend-config
     ports:
@@ -158,4 +194,19 @@ spec:
       path: /opt/pods/homeassistant/backup_redundant
       type: Directory
     name: mnt-homeassistant-backup-redundant-log-path
-
+  - hostPath:
+      path: /dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20231214202959-if00
+      type: CharDevice
+    name: dev-homeassistant-backend-zigbee-dongle
+  - hostPath:
+      path: /opt/pods/homeassistant/grafana
+      type: Directory
+    name: mnt-homeassistant-grafana
+  - hostPath:
+      path: /opt/pods/homeassistant/influxdb/data
+      type: Directory
+    name: mnt-homeassistant-influxdb-data
+  - hostPath:
+      path: /opt/pods/homeassistant/influxdb/config
+      type: Directory
+    name: mnt-homeassistant-influxdb-config
