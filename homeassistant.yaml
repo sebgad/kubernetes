@@ -46,9 +46,6 @@ spec:
       name: mnt-homeassistant-grafana
   - image: docker.io/library/influxdb
     name: influxdb
-#    ports:
-#      - containerPort: 8086
-#        HostPort: 8086
     env:
       - name: DOCKER_INFLUXDB_INIT_MODE
         value: setup
@@ -70,14 +67,7 @@ spec:
       name: mnt-homeassistant-influxdb-config
   - image: ghcr.io/home-assistant/home-assistant:stable
     name: backend
-    securityContext:
-      procMount: Unmasked
-      capabilities:
-        add:
-          - SYS_RAWIO
     volumeMounts:
-    - mountPath: /dev/ttyACM0
-      name: dev-homeassistant-backend-zigbee-dongle
     - mountPath: /config
       name: mnt-homeassistant-backend-config
     ports:
@@ -149,6 +139,19 @@ spec:
         name: etc-localtime
       - mountPath: /var/log
         name: mnt-homeassistant-backup-redundant-log-path
+  - name: zigbee2mqtt
+    image: docker.io/koenkk/zigbee2mqtt
+    env:
+      - name: TZ
+        value: Europe/Berlin
+    volumeMounts:
+    - mountPath: /app/data
+      name: mnt-homeassistant-zigbee2mqtt-data-path
+    - mountPath: /dev/ttyACM0
+      name: dev-homeassistant-backend-zigbee-dongle
+    ports:
+    - containerPort: 8080
+      hostPort: 8088
   volumes:
   - hostPath:
       path: /opt/pods/homeassistant/mosquitto_eclipse/config
@@ -210,3 +213,7 @@ spec:
       path: /opt/pods/homeassistant/influxdb/config
       type: Directory
     name: mnt-homeassistant-influxdb-config
+  - hostPath:
+      path: /opt/pods/homeassistant/zigbee2mqtt
+      type: Directory
+    name: mnt-homeassistant-zigbee2mqtt-data-path
