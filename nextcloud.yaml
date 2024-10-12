@@ -301,4 +301,3 @@ spec:
         path: /opt/pods/nextcloud/backup_data_redundant
         type: Directory
       name: mnt-nextcloud-backup-data-redundant-log-path
-
