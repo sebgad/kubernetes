@@ -8,8 +8,6 @@ metadata:
   annotations:
     io.containers.autoupdate/database: registry
     io.containers.autoupdate/webserver: registry
-    io.containers.autoupdate/backup: registry
-    io.containers.autoupdate/backup-redundant: registry
   labels:
     app: wordpress
   name: wordpress
@@ -61,77 +59,6 @@ spec:
       volumeMounts:
         - mountPath: /var/www/html
           name: mnt-wordpress-webserver-html-path
-    - name: backup
-      image: docker.io/sebgad/restainer:latest
-      env:
-        - name: MARIADB_DATABASE
-          value: wordpress
-        - name: MARIADB_BACKUP_USER
-          value: wordpress
-        - name: MARIADB_BACKUP_PW
-          valueFrom:
-            secretKeyRef:
-              name: wordpress
-              key: db_wordpress_pw
-        - name: RESTIC_TAG
-          value: wordpress
-        - name: RESTIC_FORGET_ARGS
-          value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
-        - name: RESTIC_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: wordpress
-              key: restic_pw
-        - name: TERM
-          value: xterm
-        - name: BACKUP_CRON
-          value: "0 5 * * *"
-        - name: CHECK_CRON
-          value: "0 22 * * *"
-      args:
-        - tail
-        - -fn0
-        - /var/log/cron.log
-      volumeMounts:
-        - mountPath: /mnt/repo
-          name: mnt-wordpress-backup-host-path
-        - mountPath: /data
-          name: mnt-wordpress-webserver-html-path
-        - mountPath: /etc/timezone
-          name: etc-timezone
-        - mountPath: /etc/localtime
-          name: etc-localtime
-    - name: backup-redundant
-      image: docker.io/sebgad/restainer:latest
-      env:
-        - name: RESTIC_TAG
-          value: wordpress
-        - name: RESTIC_FORGET_ARGS
-          value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
-        - name: RESTIC_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: wordpress
-              key: restic_pw
-        - name: TERM
-          value: xterm
-        - name: BACKUP_CRON
-          value: "0 5 * * *"
-        - name: CHECK_CRON
-          value: "0 22 * * *"
-      args:
-        - tail
-        - -fn0
-        - /var/log/cron.log
-      volumeMounts:
-        - mountPath: /mnt/repo
-          name: mnt-wordpress-backup-redundant-host-path
-        - mountPath: /data
-          name: mnt-wordpress-webserver-html-path
-        - mountPath: /etc/timezone
-          name: etc-timezone
-        - mountPath: /etc/localtime
-          name: etc-localtime
   volumes:
     - hostPath:
         path: /etc/timezone
@@ -153,20 +80,4 @@ spec:
         path: /opt/pods/wordpress/webserver
         type: Directory
       name: mnt-wordpress-webserver-html-path
-    - hostPath:
-        path: /mnt/clouddrive_backup/backup/wordpress
-        type: Directory
-      name: mnt-wordpress-backup-host-path
-    - hostPath:
-        path: /mnt/clouddrive_backup/backup_redundant/wordpress
-        type: Directory
-      name: mnt-wordpress-backup-redundant-host-path
-    - hostPath:
-        path: /opt/pods/wordpress/backup
-        type: Directory
-      name: mnt-wordpress-backup-log-path
-    - hostPath:
-        path: /opt/pods/wordpress/backup_redundant
-        type: Directory
-      name: mnt-wordpress-backup-redundant-log-path
 

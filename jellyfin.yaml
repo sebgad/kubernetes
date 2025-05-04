@@ -3,14 +3,11 @@ kind: Pod
 metadata:
   annotations:
     io.containers.autoupdate/backend: registry
-    io.containers.autoupdate/backup-config: registry
-    io.containers.autoupdate/backup-media: registry
-    io.containers.autoupdate/backup-redundant-config: registry
-    io.containers.autoupdate/backup-redundant-media: registry
   labels:
     app: jellyfin
   name: jellyfin
 spec:
+  restartPolicy: always
   containers:
   - name: backend
     image: docker.io/jellyfin/jellyfin:latest
@@ -24,138 +21,6 @@ spec:
       name: mnt-jellyfin-backend-cache-path
     - mountPath: /media
       name: mnt-jellyfin-backend-media-path
-  - name: backup-config
-    image: docker.io/sebgad/restainer:latest
-    env:
-      - name: RESTIC_TAG
-        value: jellyfin-config
-      - name: RESTIC_FORGET_ARGS
-        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
-      - name: RESTIC_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: jellyfin
-            key: restic_pw
-      - name: TERM
-        value: xterm
-      - name: BACKUP_CRON
-        value: "0 5 * * *"
-      - name: CHECK_CRON
-        value: "0 22 * * *"
-    args:
-      - tail
-      - -fn0
-      - /var/log/cron.log
-    volumeMounts:
-      - mountPath: /mnt/repo
-        name: mnt-jellyfin-backup-config-host-path
-      - mountPath: /data
-        name: mnt-jellyfin-backend-config-path
-      - mountPath: /etc/timezone
-        name: etc-timezone
-      - mountPath: /etc/localtime
-        name: etc-localtime
-      - mountPath: /var/log
-        name: mnt-jellyfin-backup-config-log-path
-  - name: backup-media
-    image: docker.io/sebgad/restainer:latest
-    env:
-      - name: RESTIC_TAG
-        value: jellyfin-media
-      - name: RESTIC_FORGET_ARGS
-        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
-      - name: RESTIC_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: jellyfin
-            key: restic_pw
-      - name: TERM
-        value: xterm
-      - name: BACKUP_CRON
-        value: "0 5 * * *"
-      - name: CHECK_CRON
-        value: "0 22 * * *"
-    args:
-      - tail
-      - -fn0
-      - /var/log/cron.log
-    volumeMounts:
-      - mountPath: /mnt/repo
-        name: mnt-jellyfin-backup-media-host-path
-      - mountPath: /data
-        name: mnt-jellyfin-backend-media-path
-      - mountPath: /etc/timezone
-        name: etc-timezone
-      - mountPath: /etc/localtime
-        name: etc-localtime
-      - mountPath: /var/log
-        name: mnt-jellyfin-backup-media-log-path
-  - name: backup-redundant-config
-    image: docker.io/sebgad/restainer:latest
-    env:
-      - name: RESTIC_TAG
-        value: jellyfin-config
-      - name: RESTIC_FORGET_ARGS
-        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
-      - name: RESTIC_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: jellyfin
-            key: restic_pw
-      - name: TERM
-        value: xterm
-      - name: BACKUP_CRON
-        value: "0 5 * * *"
-      - name: CHECK_CRON
-        value: "0 22 * * *"
-    args:
-      - tail
-      - -fn0
-      - /var/log/cron.log
-    volumeMounts:
-      - mountPath: /mnt/repo
-        name: mnt-jellyfin-backup-redundant-host-path
-      - mountPath: /data
-        name: mnt-jellyfin-backend-config-path
-      - mountPath: /etc/timezone
-        name: etc-timezone
-      - mountPath: /etc/localtime
-        name: etc-localtime
-      - mountPath: /var/log
-        name: mnt-jellyfin-backup-config-redundant-log-path
-  - name: backup-redundant-media
-    image: docker.io/sebgad/restainer:latest
-    env:
-      - name: RESTIC_TAG
-        value: jellyfin-media
-      - name: RESTIC_FORGET_ARGS
-        value: --keep-daily 28 --keep-weekly 12 --keep-monthly 12 --group-by paths --prune
-      - name: RESTIC_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: jellyfin
-            key: restic_pw
-      - name: TERM
-        value: xterm
-      - name: BACKUP_CRON
-        value: "0 5 * * *"
-      - name: CHECK_CRON
-        value: "0 22 * * *"
-    args:
-      - tail
-      - -fn0
-      - /var/log/cron.log
-    volumeMounts:
-      - mountPath: /mnt/repo
-        name: mnt-jellyfin-backup-redundant-media-host-path
-      - mountPath: /data
-        name: mnt-jellyfin-backend-media-path
-      - mountPath: /etc/timezone
-        name: etc-timezone
-      - mountPath: /etc/localtime
-        name: etc-localtime
-      - mountPath: /var/log
-        name: mnt-jellyfin-backup-media-redundant-log-path
   volumes:
   - hostPath:
       path: /etc/timezone
@@ -166,50 +31,14 @@ spec:
       type: Directory
     name: etc-localtime
   - hostPath:
-      path: /opt/pods/jellyfin/config
+      path: /kubernetes/jellyfin/config
       type: Directory
     name: mnt-jellyfin-backend-config-path
   - hostPath:
-      path: /opt/pods/jellyfin/cache
+      path: /kubernetes/jellyfin/cache
       type: Directory
     name: mnt-jellyfin-backend-cache-path
   - hostPath:
-      path: /mnt/clouddrive/jellyfin
+      path: /kubernetes/jellyfin/media
       type: Directory
     name: mnt-jellyfin-backend-media-path
-  - hostPath:
-      path: /mnt/clouddrive_backup/backup/jellyfin/opt
-      type: Directory
-    name: mnt-jellyfin-backup-config-host-path
-  - hostPath:
-      path: /mnt/clouddrive_backup/backup/jellyfin/media
-      type: Directory
-    name: mnt-jellyfin-backup-media-host-path
-  - hostPath:
-      path: /mnt/clouddrive_backup/backup_redundant/jellyfin/opt
-      type: Directory
-    name: mnt-jellyfin-backup-redundant-host-path
-  - hostPath:
-      path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
-      type: Directory
-    name: mnt-jellyfin-backup-redundant-media-host-path
-  - hostPath:
-      path: /mnt/clouddrive_backup/backup_redundant/jellyfin/media
-      type: Directory
-    name: mnt-jellyfin-backup-redundant-media-host-path
-  - hostPath:
-      path: /opt/pods/jellyfin/backup_config
-      type: Directory
-    name: mnt-jellyfin-backup-config-log-path
-  - hostPath:
-      path: /opt/pods/jellyfin/backup_media
-      type: Directory
-    name: mnt-jellyfin-backup-media-log-path
-  - hostPath:
-      path: /opt/pods/jellyfin/backup_config_redundant
-      type: Directory
-    name: mnt-jellyfin-backup-config-redundant-log-path
-  - hostPath:
-      path: /opt/pods/jellyfin/backup_media_redundant
-      type: Directory
-    name: mnt-jellyfin-backup-media-redundant-log-path
