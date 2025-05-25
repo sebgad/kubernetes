@@ -12,6 +12,7 @@ metadata:
     io.containers.autoupdate/redis: registry
     io.containers.autoupdate/antivirus: registry
     io.containers.autoupdate/office: registry
+    io.containers.autoupdate/webserver: registry
   labels:
     app: nextcloud
   name: nextcloud
@@ -19,6 +20,18 @@ spec:
   restartPolicy: always
   podManagementPolicy: OrderedReady
   containers:
+    - name: webserver
+      image: docker.io/sebgad/nginx-stable-alpine-updated
+      ports:
+        - containerPort: 80
+          hostPort: 8083
+      volumeMounts:
+        - mountPath: /etc/nginx/nginx.conf
+          name: mnt-nextcloud-webserver-conf
+        - mountPath: /var/www/html
+          name: mnt-nextcloud-backend-html-path
+        - mountPath: /var/www/html/data
+          name: mnt-nextcloud-backend-data-path
     - name: office
       image: docker.io/collabora/code
       env:
@@ -94,15 +107,12 @@ spec:
           value: 8000
       securityContext: {}
     - name: backend
-      image: docker.io/library/nextcloud:production-apache
+      image: docker.io/sebgad/nextcloud-fpm-alpine-updated
       env:
         - name: PHP_UPLOAD_LIMIT
           value: 12G
         - name: PHP_MEMORY_LIMIT
           value: 1024M
-      ports:
-        - containerPort: 80
-          hostPort: 8083
       volumeMounts:
         - mountPath: /var/www/html
           name: mnt-nextcloud-backend-html-path
@@ -155,3 +165,7 @@ spec:
         path: /kubernetes/nextcloud/hooks/before-starting.d
         type: Directory
       name: mnt-nextcloud-backend-before-starting
+    - hostPath:
+        path: /kubernetes/nextcloud/webserver/nginx.conf
+        type: File
+      name: mnt-nextcloud-webserver-conf
