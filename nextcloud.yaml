@@ -124,6 +124,10 @@ spec:
           name: mnt-nextcloud-backend-post-upgrade
         - mountPath: /docker-entrypoint-hooks.d/before-starting
           name: mnt-nextcloud-backend-before-starting
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /etc/timezone
+          name: etc-timezone
   volumes:
     - hostPath:
         path: /etc/timezone

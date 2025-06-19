@@ -84,6 +84,10 @@ spec:
           name: mnt-vaultwarden-database-lib-path
         - mountPath: /docker-entrypoint-initdb.d
           name: mnt-vaultwarden-database-entrypoint-path
+        - mountPath: /etc/timezone
+          name: etc-timezone
+        - mountPath: /etc/localtime
+          name: etc-localtime
       args:
         - mariadbd
   volumes:
@@ -107,5 +111,3 @@ spec:
         path: /kubernetes-fast/vaultwarden/vaultwarden
         type: Directory
       name: mnt-vaultwarden-backend-data-path
-
-

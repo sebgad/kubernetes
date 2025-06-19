@@ -71,6 +71,10 @@ spec:
     volumeMounts:
     - mountPath: /config
       name: mnt-homeassistant-backend-config
+    - mountPath: /etc/localtime
+      name: etc-localtime
+    - mountPath: /etc/timezone
+      name: etc-timezone
     ports:
       - containerPort: 8123
         hostPort: 8123
