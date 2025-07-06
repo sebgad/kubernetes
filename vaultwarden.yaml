@@ -16,7 +16,7 @@ spec:
   restartPolicy: always
   containers:
     - name: backend
-      image: docker.io/vaultwarden/server:latest
+      image: docker.io/sebgad/vaultwarden-alpine-updated
       env:
         - name: INVITATIONS_ALLOWED
           value: "false"
