@@ -1,0 +1,63 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.3
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.containers.autoupdate/hbbs: registry
+    io.containers.autoupdate/hbbr: registry
+  labels:
+    app: rustdesk
+  name: rustdesk
+spec:
+  restartPolicy: always
+  podManagementPolicy: OrderedReady
+  containers:
+    - name: hbbr
+      image: docker.io/rustdesk/rustdesk-server:latest
+      command: ["/hbbr"]
+      ports:
+        - containerPort: 21117 # Relay service
+        - containerPort: 21119 # webUI
+      volumeMounts:
+        - mountPath: /root
+          name: hbbr-root
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /etc/timezone
+          name: etc-timezone
+    - name: hbbs
+      image: docker.io/rustdesk/rustdesk-server:latest
+      command: ["/hbbs", "-r", "localhost:21117"]
+      ports:
+        - containerPort: 21115
+        - containerPort: 21116
+        - containerPort: 21118 # webUI
+        - containerPort: 21116
+          protocol: UDP
+      volumeMounts:
+        - mountPath: /root
+          name: hbbs-root
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /etc/timezone
+          name: etc-timezone
+  volumes:
+    - hostPath:
+        path: /etc/timezone
+        type: Directory
+      name: etc-timezone
+    - hostPath:
+        path: /etc/localtime
+        type: Directory
+      name: etc-localtime
+    - hostPath:
+        path: /kubernetes-fast/rustdesk/hbbr
+        type: Directory
+      name: root-hbbr
+    - hostPath:
+        path: /kubernetes-fast/rustdesk/hbbs
+        type: Directory
+      name: root-hbbs

@@ -63,8 +63,9 @@ if __name__ == "__main__":
                 answer = input("Do you want to run the generated secret? [y/Any]").strip()
                 if answer == "y":
                     subprocess.run(["podman", "kube", "play", output_file])
-		answer = input("Do you want to delete the generated secret file? [y/Any]").strip()
-		if answer == "y":
-		    subprocess.run(["rm", output_file])
+
+        answer = input("Do you want to delete the generated secret file? [y/Any]").strip()
+        if answer == "y":
+            subprocess.run(["rm", output_file])
     else:
         output_file = input("Enter path for updated YAML output: ").strip()
