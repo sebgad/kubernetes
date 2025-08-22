@@ -1,0 +1,124 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.3
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.containers.autoupdate/server: registry
+    io.containers.autoupdate/database: registry
+    io.containers.autoupdate/machine-learning: registry
+    io.containers.autoupdate/redis: registry
+  labels:
+    app: immich
+  name: immich
+spec:
+  restartPolicy: always
+  containers:
+    - name: server
+      image: ghcr.io/immich-app/immich-server:v1.138.1
+      env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: immich
+              key: database_root_pw
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: immich
+        - name: DB_URL
+          value: "localhost://postgres:$(POSTGRES_PASSWORD)@localhost:5432/immich"
+      ports:
+        - containerPort: 2283
+          hostPort: 2283
+      volumeMounts:
+        - mountPath: /data
+          name: mnt-immich-server-data-path
+        - mountPath: /etc/timezone
+          name: etc-timezone
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+    - name: machine-learning
+      image: ghcr.io/immich-app/immich-machine-learning:v1.138.1
+      env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: immich
+              key: database_root_pw
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: immich
+        - mountPath: /etc/timezone
+          name: etc-timezone
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+      volumeMounts:
+        - mountPath: /cache
+          name: mnt-immich-machine-learning-cache-path
+    - name: redis
+      image: docker.io/library/redis
+      command: ["redis-server"]
+      volumeMounts:
+        - mountPath: /data
+          name: mnt-immich-redis-persistance-path
+      healthcheck:
+        exec:
+          command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    - name: database
+      image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:32324a2f41df5de9efe1af166b7008c3f55646f8d0e00d9550c16c9822366b4a
+      env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: immich
+              key: database_root_pw
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: immich
+        - name: POSTGRES_INITDB_ARGS
+          value: "--data-checksums"
+      volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: mnt-immich-database-lib-path
+        - mountPath: /etc/timezone
+          name: etc-timezone
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+  volumes:
+    - hostPath:
+        path: /etc/timezone
+        type: File
+      name: etc-timezone
+    - hostPath:
+        path: /etc/localtime
+        type: File
+      name: etc-localtime
+    - hostPath:
+        path: /home/sebastian/kubernetes-fast/immich/database/data
+        type: Directory
+      name: mnt-immich-database-lib-path
+    - hostPath:
+        path: /home/sebastian/kubernetes-fast/immich/redis/data
+        type: Directory
+      name: mnt-immich-redis-persistance-path
+    - hostPath:
+        path: /home/sebastian/kubernetes-fast/immich/machine-learning/cache
+        type: Directory
+      name: mnt-immich-machine-learning-cache-path
+    - hostPath:
+        path: /home/sebastian/kubernetes-fast/immich/server/data
+        type: Directory
+      name: mnt-immich-server-data-path
