@@ -17,29 +17,35 @@ spec:
   containers:
     - name: hbbr
       image: docker.io/rustdesk/rustdesk-server:latest
-      command: ["/hbbr"]
+      command: ["hbbr"]
       ports:
         - containerPort: 21117 # Relay service
+          hostPort: 21117
         - containerPort: 21119 # webUI
+          hostPort: 21119
       volumeMounts:
         - mountPath: /root
-          name: hbbr-root
+          name: rustdesk-root
         - mountPath: /etc/localtime
           name: etc-localtime
         - mountPath: /etc/timezone
           name: etc-timezone
     - name: hbbs
       image: docker.io/rustdesk/rustdesk-server:latest
-      command: ["/hbbs", "-r", "localhost:21117"]
+      command: ["hbbs", "-r", "localhost:21117"]
       ports:
         - containerPort: 21115
+          hostPort: 21115
         - containerPort: 21116
+          hostPort: 21116
         - containerPort: 21118 # webUI
+          hostPort: 21118
         - containerPort: 21116
+          hostPort: 21116
           protocol: UDP
       volumeMounts:
         - mountPath: /root
-          name: hbbs-root
+          name: rustdesk-root
         - mountPath: /etc/localtime
           name: etc-localtime
         - mountPath: /etc/timezone
@@ -54,10 +60,6 @@ spec:
         type: Directory
       name: etc-localtime
     - hostPath:
-        path: /kubernetes-fast/rustdesk/hbbr
+        path: /kubernetes-fast/rustdesk
         type: Directory
-      name: root-hbbr
-    - hostPath:
-        path: /kubernetes-fast/rustdesk/hbbs
-        type: Directory
-      name: root-hbbs
+      name: rustdesk-root
