@@ -42,6 +42,8 @@ spec:
         - mountPath: /etc/localtime
           name: etc-localtime
           readOnly: true
+        - mountPath: /srv/external-library/Pictures
+          name: mnt-immich-server-external-pictures
     - name: machine-learning
       image: ghcr.io/immich-app/immich-machine-learning:v1.138.1
       env:
@@ -107,18 +109,22 @@ spec:
         type: File
       name: etc-localtime
     - hostPath:
-        path: /home/sebastian/kubernetes-fast/immich/database/data
+        path: /kubernetes-fast/immich/database
         type: Directory
       name: mnt-immich-database-lib-path
     - hostPath:
-        path: /home/sebastian/kubernetes-fast/immich/redis/data
+        path: /kubernetes-fast/immich/redis
         type: Directory
       name: mnt-immich-redis-persistance-path
     - hostPath:
-        path: /home/sebastian/kubernetes-fast/immich/machine-learning/cache
+        path: /kubernetes-fast/immich/cache
         type: Directory
       name: mnt-immich-machine-learning-cache-path
     - hostPath:
-        path: /home/sebastian/kubernetes-fast/immich/server/data
+        path: /kubernetes/immich/data
         type: Directory
       name: mnt-immich-server-data-path
+    - hostPath:
+        path: /kubernetes/nextcloud/images
+        type: Directory
+      name: mnt-immich-server-external-pictures
