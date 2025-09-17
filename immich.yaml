@@ -17,7 +17,7 @@ spec:
   restartPolicy: always
   containers:
     - name: server
-      image: ghcr.io/immich-app/immich-server:v1.138.1
+      image: ghcr.io/immich-app/immich-server:v1.142.1
       env:
         - name: POSTGRES_PASSWORD
           valueFrom:
@@ -30,6 +30,8 @@ spec:
           value: immich
         - name: DB_URL
           value: "localhost://postgres:$(POSTGRES_PASSWORD)@localhost:5432/immich"
+        - name: TZ
+          value: Europe/Berlin
       ports:
         - containerPort: 2283
           hostPort: 2283
@@ -45,7 +47,7 @@ spec:
         - mountPath: /srv/external-library/Pictures
           name: mnt-immich-server-external-pictures
     - name: machine-learning
-      image: ghcr.io/immich-app/immich-machine-learning:v1.138.1
+      image: ghcr.io/immich-app/immich-machine-learning:v1.142.1
       env:
         - name: POSTGRES_PASSWORD
           valueFrom:
@@ -56,13 +58,15 @@ spec:
           value: postgres
         - name: POSTGRES_DB
           value: immich
+        - name: TZ
+          value: Europe/Berlin
+      volumeMounts:
         - mountPath: /etc/timezone
           name: etc-timezone
           readOnly: true
         - mountPath: /etc/localtime
           name: etc-localtime
           readOnly: true
-      volumeMounts:
         - mountPath: /cache
           name: mnt-immich-machine-learning-cache-path
     - name: redis
@@ -77,7 +81,7 @@ spec:
         initialDelaySeconds: 10
         periodSeconds: 10
     - name: database
-      image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:32324a2f41df5de9efe1af166b7008c3f55646f8d0e00d9550c16c9822366b4a
+      image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:8d292bdb796aa58bbbaa47fe971c8516f6f57d6a47e7172e62754feb6ed4e7b0
       env:
         - name: POSTGRES_PASSWORD
           valueFrom:
