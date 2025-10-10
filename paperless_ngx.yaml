@@ -1,0 +1,151 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.3
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.containers.autoupdate/backend: registry
+    io.containers.autoupdate/database: registry
+    io.containers.autoupdate/tika: registry
+    io.containers.autoupdate/redis: registry
+    io.containers.autoupdate/gotenberg: registry
+  labels:
+    app: ngx-paperless
+  name: ngx-paperless
+spec:
+  restartPolicy: always
+  containers:
+    - name: backend
+      image: ghcr.io/paperless-ngx/paperless-ngx:latest
+      env:
+        - name: PAPERLESS_REDIS
+          valueFrom:
+            secretKeyRef:
+              name: ngx_paperless
+              key: redis_url_pw
+        - name: PAPERLESS_DBHOST
+          value: localhost
+        - name: PAPERLESS_TIKA_ENABLED
+          value: 1
+        - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
+          value: "http://localhost:3000"
+        - name: PAPERLESS_TIKA_ENDPOINT
+          value: "http://localhost:9998"
+        - name: POSTGRES_DB
+          value: paperless
+        - name: POSTGRES_USER
+          value: paperless
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ngx_paperless
+              key: postgres_pw
+        - name: PAPERLESS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ngx_paperless
+              key: paperless_secret_key
+        - name: PAPERLESS_URL
+          value: "ngx-paperless.sebastianyue.home.arpa"
+        - name: PAPERLESS_USE_X_FORWARDED_HOST
+          value: true
+      ports:
+        - containerPort: 8090
+          hostPort: 8000
+      volumeMounts:
+        - mountPath: /usr/src/paperless/data
+          name: mnt-paperless-ngx-server-data-path
+        - mountPath: /usr/src/paperless/media
+          name: mnt-paperless-ngx-server-media-path
+        - mountPath: /usr/src/paperless/export
+          name: mnt-paperless-ngx-server-export-path
+        - mountPath: /usr/src/paperless/consume
+          name: mnt-paperless-ngx-server-consume-path
+        - mountPath: /etc/timezone
+          name: etc-timezone
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+    - name: redis
+      image: docker.io/library/redis
+      env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ngx_paperless
+              key: redis_pw
+      command: ["redis-server"]
+      args: ["--requirepass", "$(REDIS_PASSWORD)"]
+      volumeMounts:
+        - mountPath: /data
+          name: mnt-paperless-ngx-redis-persistance-path
+      healthcheck:
+        exec:
+          command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+        initialDelaySeconds: 10
+        periodSeconds: 10
+    - name: database
+      image: docker.io/library/postgres:17
+      env:
+        - name: POSTGRES_DB
+          value: paperless
+        - name: POSTGRES_USER
+          value: paperless
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ngx_paperless
+              key: postgres_pw
+      volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: mnt-paperless-ngx-database-path
+        - mountPath: /etc/timezone
+          name: etc-timezone
+          readOnly: true
+        - mountPath: /etc/localtime
+          name: etc-localtime
+          readOnly: true
+    - name: tika
+      image: docker.io/apache/tika:latest
+    - name: gotenberg
+      image: docker.io/gotenberg/gotenberg:8.22
+      commands:
+        - "gotenberg"
+        - "--chromium-disable-javascript=true"
+        - "--chromium-allow-list=file:///tmp/.*"
+  volumes:
+    - hostPath:
+        path: /etc/timezone
+        type: File
+      name: etc-timezone
+    - hostPath:
+        path: /etc/localtime
+        type: File
+      name: etc-localtime
+    - hostPath:
+        path: /kubernetes-fast/paperless-ngx/database
+        type: Directory
+      name: mnt-paperless-ngx-database-path
+    - hostPath:
+        path: /kubernetes-fast/paperless-ngx/redis
+        type: Directory
+      name: mnt-paperless-ngx-redis-persistance-path
+    - hostPath:
+        path: /kubernetes-fast/paperless-ngx/backend/data
+        type: Directory
+      name: mnt-paperless-ngx-server-data-path
+    - hostPath:
+        path: /kubernetes/paperless-ngx/backend/media
+        type: Directory
+      name: mnt-paperless-ngx-server-media-path
+    - hostPath:
+        path: /kubernetes-fast/paperless-ngx/backend/export
+        type: Directory
+      name: mnt-paperless-ngx-server-export-path
+    - hostPath:
+        path: /kubernetes-fast/paperless-ngx/backend/consume
+        type: Directory
+      name: mnt-paperless-ngx-server-consume-path
