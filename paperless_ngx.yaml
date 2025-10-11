@@ -48,12 +48,12 @@ spec:
               name: ngx_paperless
               key: paperless_secret_key
         - name: PAPERLESS_URL
-          value: "http://ngx-paperless.sebastianyue.home.arpa"
+          value: "http://paperless-ngx.sebastianyue.home.arpa"
         - name: PAPERLESS_USE_X_FORWARDED_HOST
           value: true
       ports:
-        - containerPort: 8090
-          hostPort: 8000
+        - containerPort: 8000
+          hostPort: 8090
       volumeMounts:
         - mountPath: /usr/src/paperless/data
           name: mnt-paperless-ngx-server-data-path
