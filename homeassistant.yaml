@@ -28,6 +28,8 @@ spec:
     env:
       - name: TZ
         value: Europe/Berlin
+      - name: EMQX_NODE_NAME
+        value: emqx@127.0.0.1
   - name: grafana
     image: docker.io/grafana/grafana
     ports:
@@ -75,6 +77,27 @@ spec:
     ports:
       - containerPort: 8123
         hostPort: 8123
+  - name: database
+    image: docker.io/library/postgres:17
+    env:
+      - name: POSTGRES_DB
+        value: homeassistant-emqx
+      - name: POSTGRES_USER
+        value: homeassistant-emqx
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homeassistant
+            key: postgres_pw
+    volumeMounts:
+      - mountPath: /var/lib/postgresql/data
+        name: mnt-homeassistant-database-path
+      - mountPath: /etc/timezone
+        name: etc-timezone
+        readOnly: true
+      - mountPath: /etc/localtime
+        name: etc-localtime
+        readOnly: true
   - name: zigbee2mqtt
     image: docker.io/koenkk/zigbee2mqtt
     env:
@@ -89,10 +112,6 @@ spec:
     - containerPort: 8080
       hostPort: 8088
   volumes:
-  - hostPath:
-      path: /kubernetes/homeassistant/mosquitto_eclipse/config
-      type: Directory
-    name: mnt-homeassistant-mosquitto-config
   - hostPath:
       path: /kubernetes/homeassistant/emqx/data
       type: Directory
@@ -133,3 +152,7 @@ spec:
       path: /kubernetes/homeassistant/zigbee2mqtt
       type: Directory
     name: mnt-homeassistant-zigbee2mqtt-data-path
+  - hostPath:
+      path: /kubernetes/homeassistant/database
+      type: Directory
+    name: mnt-homeassistant-database-path

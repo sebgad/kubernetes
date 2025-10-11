@@ -12,8 +12,8 @@ metadata:
     io.containers.autoupdate/redis: registry
     io.containers.autoupdate/gotenberg: registry
   labels:
-    app: ngx-paperless
-  name: ngx-paperless
+    app: paperless-ngx
+  name: paperless-ngx
 spec:
   restartPolicy: always
   containers:
@@ -26,7 +26,7 @@ spec:
               name: ngx_paperless
               key: redis_url_pw
         - name: PAPERLESS_DBHOST
-          value: localhost
+          value: 127.0.0.1
         - name: PAPERLESS_TIKA_ENABLED
           value: 1
         - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
@@ -48,7 +48,7 @@ spec:
               name: ngx_paperless
               key: paperless_secret_key
         - name: PAPERLESS_URL
-          value: "ngx-paperless.sebastianyue.home.arpa"
+          value: "http://ngx-paperless.sebastianyue.home.arpa"
         - name: PAPERLESS_USE_X_FORWARDED_HOST
           value: true
       ports:
@@ -82,11 +82,6 @@ spec:
       volumeMounts:
         - mountPath: /data
           name: mnt-paperless-ngx-redis-persistance-path
-      healthcheck:
-        exec:
-          command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
-        initialDelaySeconds: 10
-        periodSeconds: 10
     - name: database
       image: docker.io/library/postgres:17
       env:
