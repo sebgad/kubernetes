@@ -130,6 +130,29 @@ spec:
           name: etc-localtime
         - mountPath: /etc/timezone
           name: etc-timezone
+    - name: appapi-harp
+      image: ghcr.io/nextcloud/nextcloud-appapi-harp:release
+      env:
+        - name: HP_SHARED_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud
+              key: hp_shared_key
+        - name: NC_INSTANCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud
+              key: nc_instance_url
+      volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: podman-sock
+        - mountPath: /kubernetes/nextcloud/harp/certs
+          name: mnt-harp-certs
+      ports:
+        - containerPort: 8780
+          hostPort: 8780
+        - containerPort: 8782
+          hostPort: 8782
   volumes:
     - hostPath:
         path: /etc/timezone
@@ -179,3 +202,11 @@ spec:
         path: /kubernetes/nextcloud/webserver/nginx.conf
         type: File
       name: mnt-nextcloud-webserver-conf
+    - hostPath:
+        path: /run/user/1000/podman/podman.sock
+        type: Socket
+      name: podman-sock
+    - hostPath:
+        path: /kubernetes/nextcloud/harp/certs
+        type: Directory
+      name: mnt-harp-certs
