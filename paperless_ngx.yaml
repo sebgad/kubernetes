@@ -27,6 +27,8 @@ spec:
               key: redis_url_pw
         - name: PAPERLESS_DBHOST
           value: 127.0.0.1
+        - name: PAPERLESS_CONSUMER_POLLING
+          value: 10
         - name: PAPERLESS_TIKA_ENABLED
           value: 1
         - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
