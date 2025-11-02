@@ -27,8 +27,10 @@ spec:
               key: redis_url_pw
         - name: PAPERLESS_DBHOST
           value: 127.0.0.1
+        - name: PAPERLESS_OCR_USER_ARGS
+          value: '{"continue_on_soft_render_error": true}'
         - name: PAPERLESS_CONSUMER_POLLING
-          value: 10
+          value: 60
         - name: PAPERLESS_TIKA_ENABLED
           value: 1
         - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
@@ -50,9 +52,19 @@ spec:
               name: ngx_paperless
               key: paperless_secret_key
         - name: PAPERLESS_URL
-          value: "http://paperless-ngx.sebastianyue.home.arpa"
+          value: "https://paperless-ngx.sebastianyue.ddns.net"
         - name: PAPERLESS_USE_X_FORWARDED_HOST
           value: true
+        - name: PAPERLESS_USE_X_FORWARD_PORT
+          value: true
+        - name: PAPERLESS_PROXY_SSL_HEADER
+          value: '["HTTP_X_FORWARDED_PROTO", "https"]'
+        - name: PAPERLESS_CONSUMER_DELETE_DUPLICATES
+          value: true
+        - name: PAPERLESS_DATE_PARSER_LANGUAGES
+          value: "de+en"
+        - name: PAPERLESS_OCR_LANGUAGE
+          value: "de+en"
       ports:
         - containerPort: 8000
           hostPort: 8090
