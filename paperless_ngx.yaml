@@ -64,7 +64,7 @@ spec:
         - name: PAPERLESS_DATE_PARSER_LANGUAGES
           value: "de+en"
         - name: PAPERLESS_OCR_LANGUAGE
-          value: "de+en"
+          value: "deu+eng"
       ports:
         - containerPort: 8000
           hostPort: 8090
