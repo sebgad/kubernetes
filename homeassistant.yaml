@@ -100,6 +100,8 @@ spec:
         readOnly: true
   - name: zigbee2mqtt
     image: docker.io/koenkk/zigbee2mqtt
+    command: ["/bin/sh", "-c"]
+    args: ["sleep 15 && exec /sbin/tini -- node index.js"]
     env:
       - name: TZ
         value: Europe/Berlin
