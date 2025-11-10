@@ -20,6 +20,8 @@ spec:
     - name: backend
       image: ghcr.io/paperless-ngx/paperless-ngx:latest
       env:
+        - name: PAPERLESS_EMAIL_TASK_CRON
+          value: "*/10 * * * *"
         - name: PAPERLESS_REDIS
           valueFrom:
             secretKeyRef:
