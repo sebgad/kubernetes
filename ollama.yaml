@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.containers.autoupdate/ollama: registry
+  labels:
+    app: ollama
+  name: ollama
+spec:
+  restartPolicy: always
+  containers:
+  - name: ollama
+    image: docker.io/ollama/ollama:latest
+    resources:
+      limits:
+        cpu: "1.5"        # max 1 CPU
+        memory: "5G" # max 512 MB RAM
+    env:
+      - name: OLLAMA_NUM_PARALLEL
+        value: 1
+      - name: OLLAMA_MAX_LOADED_MODELS
+        value: 1
+    ports:
+      - containerPort: 11434
+        hostPort: 11434
+    volumeMounts:
+      - mountpath: /root/.ollama
+        name: mnt-ollama-root
+      - mountPath: /etc/localtime
+        name: etc-localtime
+      - mountPath: /etc/timezone
+        name: etc-timezone
+  - name: web-ui
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - containerPort: 8080
+        hostPort: 8002
+    env:
+      - name: "OLLAMA_BASE_URL"
+        value: "http://localhost:11434"
+    volumeMounts:
+      - mountPath: /app/backend/data
+        name: mnt-ollama-web-ui
+      - mountPath: /etc/localtime
+        name: etc-localtime
+      - mountPath: /etc/timezone
+        name: etc-timezone
+  volumes:
+    - hostPath:
+        path: /etc/timezone
+        type: File
+      name: etc-timezone
+    - hostPath:
+        path: /etc/localtime
+        type: File
+      name: etc-localtime
+    - hostPath:
+        path: /kubernetes/ollama/backend
+        type: Directory
+      name: mnt-ollama-root
+    - hostPath:
+        path: /kubernetes-fast/ollama/web-ui
+        type: Directory
+      name: mnt-ollama-web-ui

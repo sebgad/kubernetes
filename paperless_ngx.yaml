@@ -11,15 +11,72 @@ metadata:
     io.containers.autoupdate/tika: registry
     io.containers.autoupdate/redis: registry
     io.containers.autoupdate/gotenberg: registry
+    io.containers.autoupdate/paperless-gpt: registry
   labels:
     app: paperless-ngx
   name: paperless-ngx
 spec:
   restartPolicy: always
   containers:
+    - name: paperless-gpt
+      image: ghcr.io/icereed/paperless-gpt:latest
+      env:
+        - name: LOG_LEVEL
+          value: "debug"
+        - name: AUTO_GENERATE_TAGS
+          value: false
+        - name: LLM_LANGUAGE
+          value: "German"
+        - name: "LLM_BACKOFF_MAX_WAIT"
+          value: 1300
+        - name: "VISION_LLM_BACKOFF_MAX_WAIT"
+          value: 1300
+        - name: "PAPERLESS_BASE_URL"
+          value: "http://127.0.0.1:8000"
+        - name: "PAPERLESS_API_TOKEN"
+          valueFrom:
+            secretKeyRef:
+               name: ngx_paperless
+               key: api_token
+        - name: "PAPERLESS_PUBLIC_URL"
+          value: "https://paperless-ngx.sebastianyue.ddns.net"
+        - name: "LLM_PROVIDER"
+          value: "ollama"
+        - name: "LLM_MODEL"
+          value: "qwen3:8b"
+        - name: "OLLAMA_HOST"
+          value: "http://host.containers.internal:11434"
+        - name: "OLLAMA_CONTEXT_LENGTH"
+          value: "8192"
+        - name: "OCR_PROCESS_MODE"
+          value: "image"
+        - name: "TOKEN_LIMIT"
+          value: 1000
+        - name: "OCR_PROVIDER"
+          value: "llm"
+        - name: "VISION_LLM_PROVIDER"
+          value: "ollama"
+        - name: "VISION_LLM_MODEL"
+          value: "minicpm-v"
+        - name: "PDF_OCR_COMPLETE_TAG"
+          value: "paperless-gpt-ocr-complete"
+        - name: "PDF_OCR_TAGGING"
+          value: "true"
+      volumeMounts:
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /etc/timezone
+          name: etc-timezone
+      ports:
+        - containerPort: 8080
+          hostPort: 8001
     - name: backend
       image: ghcr.io/paperless-ngx/paperless-ngx:latest
       env:
+        - name: "PAPERLESS_DEBUG"
+          value: true
+        - name: "PAPERLESS_CSRF_TRUSTED_ORIGINS"
+          value: "https://paperless-ngx.sebastianyue.ddns.net"
         - name: PAPERLESS_EMAIL_TASK_CRON
           value: "*/10 * * * *"
         - name: PAPERLESS_REDIS
@@ -28,7 +85,7 @@ spec:
               name: ngx_paperless
               key: redis_url_pw
         - name: PAPERLESS_DBHOST
-          value: 127.0.0.1
+          value: "127.0.0.1"
         - name: PAPERLESS_OCR_USER_ARGS
           value: '{"continue_on_soft_render_error": true}'
         - name: PAPERLESS_CONSUMER_POLLING
