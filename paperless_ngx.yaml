@@ -21,8 +21,8 @@ spec:
     - name: paperless-gpt
       image: ghcr.io/icereed/paperless-gpt:latest
       env:
-        - name: LOG_LEVEL
-          value: "debug"
+        - name: "TZ"
+          value: "Europe/Berlin"
         - name: AUTO_GENERATE_TAGS
           value: false
         - name: LLM_LANGUAGE
@@ -43,7 +43,7 @@ spec:
         - name: "LLM_PROVIDER"
           value: "ollama"
         - name: "LLM_MODEL"
-          value: "qwen3:8b"
+          value: "gemma3:4b"
         - name: "OLLAMA_HOST"
           value: "http://host.containers.internal:11434"
         - name: "OLLAMA_CONTEXT_LENGTH"
@@ -62,34 +62,34 @@ spec:
           value: "paperless-gpt-ocr-complete"
         - name: "PDF_OCR_TAGGING"
           value: "true"
+      ports:
+        - containerPort: 8080
+          hostPort: 8001
       volumeMounts:
         - mountPath: /etc/localtime
           name: etc-localtime
         - mountPath: /etc/timezone
           name: etc-timezone
-      ports:
-        - containerPort: 8080
-          hostPort: 8001
+#        - mountPath: /app/prompts
+#          name: mnt-paperless-gpt-prompts
     - name: backend
       image: ghcr.io/paperless-ngx/paperless-ngx:latest
       env:
-        - name: "PAPERLESS_DEBUG"
-          value: true
         - name: "PAPERLESS_CSRF_TRUSTED_ORIGINS"
           value: "https://paperless-ngx.sebastianyue.ddns.net"
-        - name: PAPERLESS_EMAIL_TASK_CRON
-          value: "*/10 * * * *"
         - name: PAPERLESS_REDIS
           valueFrom:
             secretKeyRef:
               name: ngx_paperless
               key: redis_url_pw
+        - name: PAPERLESS_TIME_ZONE
+          value: "Europe/Berlin"
         - name: PAPERLESS_DBHOST
           value: "127.0.0.1"
         - name: PAPERLESS_OCR_USER_ARGS
           value: '{"continue_on_soft_render_error": true}'
         - name: PAPERLESS_CONSUMER_POLLING
-          value: 60
+          value: 10
         - name: PAPERLESS_TIKA_ENABLED
           value: 1
         - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
@@ -136,12 +136,6 @@ spec:
           name: mnt-paperless-ngx-server-export-path
         - mountPath: /usr/src/paperless/consume
           name: mnt-paperless-ngx-server-consume-path
-        - mountPath: /etc/timezone
-          name: etc-timezone
-          readOnly: true
-        - mountPath: /etc/localtime
-          name: etc-localtime
-          readOnly: true
     - name: redis
       image: docker.io/library/redis
       env:
@@ -155,6 +149,10 @@ spec:
       volumeMounts:
         - mountPath: /data
           name: mnt-paperless-ngx-redis-persistance-path
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /etc/timezone
+          name: etc-timezone
     - name: database
       image: docker.io/library/postgres:17
       env:
@@ -167,6 +165,7 @@ spec:
             secretKeyRef:
               name: ngx_paperless
               key: postgres_pw
+      args: ["-c", "max_connections=50"]
       volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: mnt-paperless-ngx-database-path
@@ -184,6 +183,11 @@ spec:
         - "gotenberg"
         - "--chromium-disable-javascript=true"
         - "--chromium-allow-list=file:///tmp/.*"
+      volumeMounts:
+        - mountPath: /etc/localtime
+          name: etc-localtime
+        - mountPath: /etc/timezone
+          name: etc-timezone
   volumes:
     - hostPath:
         path: /etc/timezone
@@ -217,3 +221,7 @@ spec:
         path: /kubernetes-fast/paperless-ngx/backend/consume
         type: Directory
       name: mnt-paperless-ngx-server-consume-path
+ #   - hostPath:
+ #       path: /kubernetes-fast/paperless-ngx/paperless-gpt/prompts
+ #       type: Directory
+ #     name: mnt-paperless-gpt-prompts

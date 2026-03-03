@@ -7,7 +7,6 @@ kind: Pod
 metadata:
   annotations:
     io.containers.autoupdate/server: registry
-    io.containers.autoupdate/database: registry
     io.containers.autoupdate/machine-learning: registry
     io.containers.autoupdate/redis: registry
   labels:
@@ -17,19 +16,17 @@ spec:
   restartPolicy: always
   containers:
     - name: server
-      image: ghcr.io/immich-app/immich-server:v2.0.1
+      image: ghcr.io/immich-app/immich-server:v2.5.6
       env:
-        - name: POSTGRES_PASSWORD
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: immich
               key: database_root_pw
-        - name: POSTGRES_USER
+        - name: DB_USER
           value: postgres
         - name: POSTGRES_DB
           value: immich
-        - name: DB_URL
-          value: "localhost://postgres:$(POSTGRES_PASSWORD)@localhost:5432/immich"
         - name: TZ
           value: Europe/Berlin
       ports:
@@ -44,17 +41,15 @@ spec:
         - mountPath: /etc/localtime
           name: etc-localtime
           readOnly: true
-        - mountPath: /srv/external-library/Pictures
-          name: mnt-immich-server-external-pictures
     - name: machine-learning
-      image: ghcr.io/immich-app/immich-machine-learning:v2.0.1
+      image: ghcr.io/immich-app/immich-machine-learning:v2.5.6
       env:
-        - name: POSTGRES_PASSWORD
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: immich
               key: database_root_pw
-        - name: POSTGRES_USER
+        - name: DB_USER
           value: postgres
         - name: POSTGRES_DB
           value: immich
@@ -81,14 +76,14 @@ spec:
         initialDelaySeconds: 10
         periodSeconds: 10
     - name: database
-      image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:41eacbe83eca995561fe43814fd4891e16e39632806253848efaf04d3c8a8b84
+      image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
       env:
-        - name: POSTGRES_PASSWORD
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: immich
               key: database_root_pw
-        - name: POSTGRES_USER
+        - name: DB_USER
           value: postgres
         - name: POSTGRES_DB
           value: immich
@@ -128,7 +123,3 @@ spec:
         path: /kubernetes/immich/data
         type: Directory
       name: mnt-immich-server-data-path
-    - hostPath:
-        path: /kubernetes/nextcloud/images
-        type: Directory
-      name: mnt-immich-server-external-pictures
